@@ -10,6 +10,9 @@
 
 #define HSE_VALUE 8000000U
 #define HSI_VALUE 8000000U
+/*!< Vector Table base offset field. This value must be a multiple of 0x200. */
+#define VECT_TAB_OFFSET 0x00000000U 
+
 
 // #include "stm32f1xx_hal_conf.h"
 // #include "stm32f1xx_hal_uart.h"
