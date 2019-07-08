@@ -1,0 +1,18 @@
+#+TITLE: SFORTH-MODEL
+#+AUTHOR: Islam Omar Ahmed
+#+EMAIL: io1131@fayoum.edu.eg
+
+#+OPTIONS: H:4
+
+* DICTIONARY: 
+|--------------------------------------------|
+|                     NAME                   |
+|------------------+-------------------+-----|
+| First Word Index | Second Word Index | ... |                   |                   |     |
+|--------------------------------------------|
+
+
+- Containing Words
+
+
+
