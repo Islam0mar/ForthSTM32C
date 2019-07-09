@@ -8,19 +8,13 @@
  * @Description: Modify Here, Please
  */
 
-#include <stdarg.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "hal/bsp.h"
 #include "forth/dictionary.h"
 #include "forth/words.h"
 
 
 int main(void) {
-  init();
+  Init();
   /* DictionaryEntry code; */
   /* loadDictionaryEntry(code, "and", 3); */
   /* code.IP[0] = &xx; */

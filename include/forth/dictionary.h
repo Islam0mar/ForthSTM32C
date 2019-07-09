@@ -17,6 +17,10 @@
 #include "global.h"
 
 // typedef enum { f_immediate, t_compile_only, t_hidden, t_idle } ForthTypes;
+#define F_IMMED   0x80U   // immediate
+#define F_COMPO   0x40U   // compile only
+#define F_HIDDEN  0x20U  // hidden
+#define F_FLASH   0x10U   // flash
 
 typedef struct elementtype {
   char *name;  // maximum word length

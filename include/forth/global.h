@@ -5,20 +5,39 @@
 
 typedef void (*FuncPtr)(void);
 
-// clang-format off
-/*
-        Implementation types.
-*/
-extern const uint8_t F_IMMED;   // immediate
-extern const uint8_t F_COMPO;   // compile only
-extern const uint8_t F_HIDDEN;  // hidden
-extern const uint8_t F_FLASH;   // flash
+// /*
+// 	The built-in variables are:
+
+// 	STATE		Is the interpreter executing code (0) or compiling a word (non-zero)?
+// 	LATEST		Points to the latest (most recently defined) word in the dictionary.
+// 	DP		Points to the next free byte of memory.  When compiling, compiled words go here.
+// 	S0		Stores the address of the top of the parameter stack.
+// 	BASE		The current base for printing and reading numbers.
+
+// 	*/
+// 	/* RAM vector table*/
+
+// 	defvar "STATE",5,,STATE
+// 	defvar "DP",2,,DP
+// 	defvar "FLASH",5,,FLASH		// latest flash position
+// 	defvar "RAM",3,,RAM			// latest ram position 
+// 	defvar "LATEST",6,,LATEST,name_QUIT @ latest defined word
+// 	defvar "F_LATEST",8,,F_LATEST,name_QUIT @ latest defined word FLASH
+// 	defvar "BASE",4,,BASE,10
+// 	defvar "S0",2,,SZ,__stack_end__
+// 	defvar "R0",2,,RZ,return_stack_top
+// 	defvar "BOOT",4,,BOOT,QUIT
 // clang-format on
 
 extern jmp_buf env;
 
-#define MAXSTACK 512
-#define MAXRSTACK 256
+#define MAXSTACK 512U
+#define MAXRSTACK 256U
+#define UART1_FIFO_SIZE 128U
+
+extern uint8_t uart_fifo[UART1_FIFO_SIZE];
+extern uint8_t uart_fifo_get_index;
+extern uint8_t uart_fifo_insert_index;
 
 // registers
 // register int *foo asm ("r12");

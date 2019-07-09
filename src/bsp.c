@@ -19,6 +19,10 @@ const uint8_t AHBPrescTable[16U] = {0, 0, 0, 0, 0, 0, 0, 0,
                                     1, 2, 3, 4, 6, 7, 8, 9};
 const uint8_t APBPrescTable[8U] = {0, 0, 0, 0, 1, 2, 3, 4};
 
+uint8_t uart_fifo[UART1_FIFO_SIZE];
+uint8_t uart_fifo_get_index = 0;
+uint8_t uart_fifo_insert_index = 0;
+
 void init() {
   /* Reset of all peripherals, Initializes the Flash interface and the Systick.
    */
@@ -26,6 +30,9 @@ void init() {
   SystemClock_Config();
   GPIO_Init();
   UART1_Init();
+  /* To not be optimized */
+  HAL_UART_Receive_IT(&huart1, &byte, 1);
+
 }
 
 
@@ -178,6 +185,7 @@ void SystemClock_Config(void) {
   }
 
   /**Configure the Systick interrupt time
+   * 1 ms
    */
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 
@@ -187,21 +195,6 @@ void SystemClock_Config(void) {
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
-}
-
-/* USART1 init function */
-void UART1_Init() {
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_ODD;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK) {
-    Error_Handler();
-  }
 }
 
 /** Configure pins as
@@ -246,6 +239,49 @@ void GPIO_Init() {
                         GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+}
+
+/* USART1 init function */
+void UART1_Init() {
+  __HAL_RCC_USART1_CLK_ENABLE();
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_ODD;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK) {
+    Error_Handler();
+  }
+  /* Peripheral interrupt init*/
+  HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(USART1_IRQn);
+
+  /* Initialize uart buffer */
+  uart_fifo_get_index = uart_fifo_insert_index = 0;
+}
+
+/* TODO: Check for errors */
+void UART1_Send(char s[]){
+  HAL_UART_Transmit(huart1, (uint8_t *) s, strlen(s), 10);
+}
+
+void USART1_IRQHandler(void)
+{
+  HAL_UART_IRQHandler(&huart1);
+}
+
+/* This callback is called by the HAL_UART_IRQHandler when the given number of bytes are received */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (huart->Instance == USART1)
+  {
+    /* Receive one byte in interrupt mode */
+    uint8_t index = ++uart_fifo_get_index & (UART1_FIFO_SIZE - 1)
+    HAL_UART_Receive_IT(&huart1, &uart_fifo[index], 1);
+  }
 }
 
 /**

@@ -56,7 +56,7 @@ set(CMAKE_BINARY_DIR "${PROJECT_PATH}/bin")
 #set(CMAKE_EXE_LINKER_FLAGS "-v -T ${LINKER_SCRIPT}")
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -mthumb -mcpu=cortex-m3 --specs=nosys.specs")
 
-set(CMAKE_C_FLAGS "-mthumb -mcpu=cortex-m3 -fno-builtin -DUSE_HAL_DRIVER -DSTM32F103xB -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections")
+set(CMAKE_C_FLAGS "-mthumb -save-temps -mcpu=cortex-m3 -fno-builtin -DUSE_HAL_DRIVER -DSTM32F103xB -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections")
 set(CMAKE_CXX_FLAGS "-mthumb -mcpu=cortex-m3 -fno-builtin -Wall std=c++11 -ffreestanding  -fdata-sections -ffunction-sections")
 set(CMAKE_ASM_FLAGS "-mimplicit-it=always -gdb3 -mthumb -mcpu=cortex-m3")
 # SYS_OBJECTS = #Long list of object files
@@ -74,7 +74,9 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
 COMMAND "${CMAKE_OBJDUMP}" -D $<TARGET_FILE:${PROJECT_NAME}.elf> >${LIST_FILE}
 COMMAND "${CMAKE_OBJCOPY}" -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
 COMMAND "${CMAKE_OBJCOPY}" -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
-COMMAND ${CMAKE_C_COMPILER} -S  ${PROJECT_PATH}/src/main.c -fverbose-asm -Ofast -mthumb -mcpu=cortex-m3 -fno-builtin -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections -o ${ASM_FILE} -I${PROJECT_PATH}/include
+# COMMAND make ARGS ${PROJECT_PATH}/src/main.c.s
+# COMMAND make main.c.s
+# COMMAND ${CMAKE_C_COMPILER} -S  ${PROJECT_PATH}/src/main.c -fverbose-asm -Ofast -mthumb -mcpu=cortex-m3 -fno-builtin -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections -o ${ASM_FILE} -I${PROJECT_PATH}/include
 COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE} \nBuilding ${LIST_FILE}")
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

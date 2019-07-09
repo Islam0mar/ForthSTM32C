@@ -13,11 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-const uint8_t F_IMMED  = 0x80;   // immediate
-const uint8_t F_COMPO  = 0x40;   // compile only
-const uint8_t F_HIDDEN = 0x20;  // hidden
-const uint8_t F_FLASH  = 0x10;   // flash
-
 DictionaryNode *makeDictionaryNode(DictionaryEntry item) {
   DictionaryNode *p;
 
@@ -98,14 +93,16 @@ bool deleteDictionaryItem(Dictionary *pd, char *name) {
   DictionaryNode *prev_p = NULL;
   for (; p; p = p->next) {
     if (strcmp(name, p->entry.name) == 0) {
-      if ((p->entry.flags & F_FLASH) == 0) {
+      if ((p->entry.flags & F_FLASH) != 0) {
+        // TODO: remove flash
+        return false;
+      } else {
         prev_p->next = p->next;
         free(p->entry.name);
         free(p->entry.ptr);
         free(p);
+        return true;
       }
-      // TODO: remove flash
-      return true;
     }
     prev_p = p;
   }

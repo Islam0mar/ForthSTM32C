@@ -8,11 +8,17 @@
 #ifndef BSP_H
 #define BSP_H
 
+#include <stdarg.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "global.h"
+
 #define HSE_VALUE 8000000U
 #define HSI_VALUE 8000000U
 /*!< Vector Table base offset field. This value must be a multiple of 0x200. */
-#define VECT_TAB_OFFSET 0x00000000U 
-
+#define VECT_TAB_OFFSET 0x00000000U
+/* Should be divisable by 2 (see HAL_UART_RxCpltCallback)*/
 
 // #include "stm32f1xx_hal_conf.h"
 // #include "stm32f1xx_hal_uart.h"
@@ -26,6 +32,7 @@ void _Error_Handler(char *, int);
 void SystemClock_Config();
 void UART1_Init();
 void GPIO_Init();
-void init();
+void Init();
+void UART1_Send();
 
 #endif /* BSP_H */
