@@ -41,6 +41,37 @@
 DEFCODE(NULL, "QUIT", 0, quit,
         "Quit your program and start again at the user prompt",
         { longjmp(env, 0); });
+
+DEFCODE(NULL, "KEY", 0, key,
+        "( -- c ) Receive one character",
+        {
+          while(terminal_buffer_get_index == terminal_buffer_insert_index){
+            Pause();
+          }
+          uint8_t index = ++terminal_buffer_get_index & (TIB_SIZE - 1);
+          terminal_buffer[index]
+          
+          
+        });
+
+    defcode "KEY",3,,KEY    
+	bl _KEY                 @ Call _KEY
+	pushTOS
+	mov tos, r0          	@ push the return value on the stack
+	NEXT
+
+
+	ldr r2 , = FIFO
+	ldrb r0, [r2, r1]		@ load the first byte of currkey
+	movw r2, # FIFO_SIZE -1
+	add r1, #1
+	and r1, r2				@ Increments CURRKEY
+	str r1, [r3]
+	bx lr                   @ return
+    .ltorg
+DEFCODE(NULL, "QUIT", 0, quit,
+        "Quit your program and start again at the user prompt",
+        { longjmp(env, 0); });
 /*
         This interpreter is pretty simple, but remember that in FORTH you can
    always override it later with a more powerful one!

@@ -33,11 +33,12 @@ extern jmp_buf env;
 
 #define MAXSTACK 512U
 #define MAXRSTACK 256U
-#define UART1_FIFO_SIZE 128U
+#define TIB_SIZE 128U
 
-extern uint8_t uart_fifo[UART1_FIFO_SIZE];
-extern uint8_t uart_fifo_get_index;
-extern uint8_t uart_fifo_insert_index;
+/* Terminal Input Buffer FIFO cycle */
+extern uint8_t terminal_buffer[TIB_SIZE];
+extern uint8_t terminal_buffer_get_index;
+extern uint8_t terminal_buffer_insert_index;
 
 // registers
 // register int *foo asm ("r12");

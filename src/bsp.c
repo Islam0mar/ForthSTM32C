@@ -279,8 +279,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   if (huart->Instance == USART1)
   {
     /* Receive one byte in interrupt mode */
-    uint8_t index = ++uart_fifo_get_index & (UART1_FIFO_SIZE - 1)
-    HAL_UART_Receive_IT(&huart1, &uart_fifo[index], 1);
+    uint8_t index = ++terminal_buffer_get_index & (TIB_SIZE - 1);
+    HAL_UART_Receive_IT(&huart1, &terminal_buffer[index], 1);
   }
 }
 
