@@ -25,11 +25,11 @@
 // implement the basic definition primitive
 #define DEFCODE(NEXT, name_str, FLAGS, func, _comnt, BLOCK)  \
   void func() BLOCK \
-  const DictionaryNode func ## _node = {.next = NEXT, .entry = {.flags = FLAGS, .length = 1, .ptr = (void*)&func}}
+  const DictionaryNode func ## _node = {.next = NEXT, .entry = {.flags = FLAGS|F_FLASH, .length = 1, .ptr = (void*)&func}}
 
 #define DEFWORD(NEXT, name_str, FLAGS, func,_comnt, words...) \
   FuncPtr functions[COUNT_VARARGS(words)] = {words}; \
-  const DictionaryNode func ## _node = {.next = NEXT, .entry = {.flags = FLAGS, .length = COUNT_VARARGS(words), .ptr = (void*)functions}}
+  const DictionaryNode func ## _node = {.next = NEXT, .entry = {.flags = FLAGS|F_FLASH, .length = COUNT_VARARGS(words), .ptr = (void*)functions}}
 
 // #define defvar(next, name_str, flags, func,_comnt, words...) 
 // //   FuncPtr functions[COUNT_VARARGS(words)] = {words}; 

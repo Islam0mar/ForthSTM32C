@@ -8,19 +8,13 @@
 #ifndef BSP_H
 #define BSP_H
 
-#include <stdarg.h>
-#include <stdint.h>
-#include <string.h>
-
 #include "forth/global.h"
-#include "system_stm32f1xx.h"
 
 #define HSE_VALUE 8000000U
 #define HSI_VALUE 8000000U
 /*!< Vector Table base offset field. This value must be a multiple of 0x200. */
 #define VECT_TAB_OFFSET 0x00000000U
-/* Should be divisable by 2 (see HAL_UART_RxCpltCallback)*/
-#define UART1_FIFO_SIZE
+
 
 extern uint32_t SystemCoreClock;          /*!< System Clock Frequency (Core Clock) */
 extern const uint8_t  AHBPrescTable[16];  /*!< AHB prescalers table values */
@@ -39,8 +33,9 @@ void SystemClock_Config();
 void UART1_Init();
 void GPIO_Init();
 void Init();
-void UART1_Send();
+void UART1_Send(char s[]);
 extern void SystemInit(void);
 extern void SystemCoreClockUpdate(void);
+void ForthError(const char *err_message);
 
 #endif /* BSP_H */

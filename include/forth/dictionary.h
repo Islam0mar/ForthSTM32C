@@ -17,10 +17,11 @@
 #include "global.h"
 
 // typedef enum { f_immediate, t_compile_only, t_hidden, t_idle } ForthTypes;
-#define F_IMMED   0x80U   // immediate
-#define F_COMPO   0x40U   // compile only
+#define F_IMMED   0x80U  // immediate
+#define F_COMPO   0x40U  // compile only
 #define F_HIDDEN  0x20U  // hidden
-#define F_FLASH   0x10U   // flash
+#define F_FLASH   0x10U  // flash
+#define F_FUNC    0x01U  // contains one function
 
 typedef struct elementtype {
   char *name;  // maximum word length
@@ -42,8 +43,12 @@ typedef struct dictionary {
   uint32_t size;
 } Dictionary;
 
+extern Dictionary dict;
+
 DictionaryNode *makeDictionaryNode(DictionaryEntry item);
 bool addToTail(DictionaryEntry item, Dictionary *pd);
+DictionaryNode *findDictionaryItem(Dictionary *pd, char *name);
+bool deleteDictionaryItem(Dictionary *pd, char *name);
 bool dictionaryEmpty(Dictionary *pd);
 void createDictionary(Dictionary *pd);
 int dictionarySize(Dictionary *pd);

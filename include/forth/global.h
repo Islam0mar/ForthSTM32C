@@ -2,6 +2,9 @@
 #define GLOBAL_H
 
 #include <setjmp.h> /* jmp_buf, setjmp, longjmp */
+#include <stdarg.h>
+#include <stdint.h>
+#include <string.h>
 
 typedef void (*FuncPtr)(void);
 
@@ -30,26 +33,19 @@ typedef void (*FuncPtr)(void);
 // clang-format on
 
 extern jmp_buf env;
-
-#define MAXSTACK 512U
-#define MAXRSTACK 256U
-#define TIB_SIZE 128U
-
-/* Terminal Input Buffer FIFO cycle */
-extern uint8_t terminal_buffer[TIB_SIZE];
-extern uint8_t terminal_buffer_get_index;
-extern uint8_t terminal_buffer_insert_index;
-
+extern bool STATE; // false excyte, true compiling
+#define EXECUTE_STATE   !STATE  //  exe
+#define COMPILE_SATE    STATE  // cmp
 // registers
 // register int *foo asm ("r12");
-extern uint32_t TOS;  // top of the stack element
-extern uint32_t PSP;  // parameter stack index
-extern uint32_t RSP;  // return stack index
+// extern uint32_t TOS;  // top of the stack element
+// extern uint32_t PSP;  // parameter stack index
+// extern uint32_t RSP;  // return stack index
 // size_t PSP;    // parameter stack index
 // size_t RSP;    // return stack index
-extern uint32_t PS[MAXSTACK];
-extern uint32_t RS[MAXRSTACK];
-extern FuncPtr *IP;  // instruction pointer
-extern FuncPtr W;    // working register
+// extern uint32_t PS[MAXSTACK];
+// extern uint32_t RS[MAXRSTACK];
+// extern FuncPtr *IP;  // instruction pointer
+// extern FuncPtr W;    // working register
 
 #endif /* GLOBAL_H */

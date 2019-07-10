@@ -20,13 +20,14 @@ int main(void) {
   /* code.IP[0] = &xx; */
   /* (*code.IP[0])(); */
   /* NEXT(); */
+  jmp_buf env;
+  setjmp(env);
+
+  if(terminal_buffer_get_index == terminal_buffer_insert_index){
+    /* Multi tasking */
+    Pause();
+  }
   
-  ldr r0, = var_FIFO_put
-		ldr r0, [r0]			@ top FIFO 
-		ldr r1, = var_FIFO_get      
-		ldr r1, [r1]			@ currkey
-		cmp r0, r1
-		beq PAUSE
 	
         bl _WORD                        @ read a word from stdin
         mov r4, r0                      @ store it in r4,r5

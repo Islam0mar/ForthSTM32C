@@ -12,16 +12,17 @@
 /*******************************************************************************
  *  Clock Definitions
  *******************************************************************************/
-uint32_t SystemCoreClock = 72000000U; /*!< System Clock Frequency (Core Clock) */
+uint32_t SystemCoreClock =
+    72000000U; /*!< System Clock Frequency (Core Clock) */
 static UART_HandleTypeDef huart1;
 
 const uint8_t AHBPrescTable[16U] = {0, 0, 0, 0, 0, 0, 0, 0,
                                     1, 2, 3, 4, 6, 7, 8, 9};
 const uint8_t APBPrescTable[8U] = {0, 0, 0, 0, 1, 2, 3, 4};
 
-uint8_t uart_fifo[UART1_FIFO_SIZE];
-uint8_t uart_fifo_get_index = 0;
-uint8_t uart_fifo_insert_index = 0;
+uint8_t terminal_buffer[TIB_SIZE];
+uint8_t terminal_buffer_get_index = 0;
+uint8_t terminal_buffer_insert_index = 0;
 
 void init() {
   /* Reset of all peripherals, Initializes the Flash interface and the Systick.
@@ -31,10 +32,11 @@ void init() {
   GPIO_Init();
   UART1_Init();
   /* To not be optimized */
-  HAL_UART_Receive_IT(&huart1, &byte, 1);
-
+  {
+    uint8_t byte;
+    HAL_UART_Receive_IT(&huart1, &byte, 1);
+  }
 }
-
 
 /**
  * @brief  Setup the microcontroller system
@@ -132,7 +134,6 @@ void SystemCoreClockUpdate(void) {
         } else {
           SystemCoreClock = HSE_VALUE * pllmull;
         }
-
       }
       break;
 
@@ -221,8 +222,8 @@ void GPIO_Init() {
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PA0 PA1 PA2 PA3
-                           PA4 PA5 PA6 PA7
-                           PA8 PA13 PA14 PA15 */
+    PA4 PA5 PA6 PA7
+    PA8 PA13 PA14 PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 |
                         GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 |
                         GPIO_PIN_8 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
@@ -230,9 +231,9 @@ void GPIO_Init() {
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB0 PB1 PB2 PB10
-                           PB11 PB12 PB13 PB14
-                           PB15 PB3 PB4 PB5
-                           PB6 PB7 PB8 PB9 */
+    PB11 PB12 PB13 PB14
+    PB15 PB3 PB4 PB5
+    PB6 PB7 PB8 PB9 */
   GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_10 |
                         GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 |
                         GPIO_PIN_15 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 |
@@ -260,24 +261,20 @@ void UART1_Init() {
   HAL_NVIC_EnableIRQ(USART1_IRQn);
 
   /* Initialize uart buffer */
-  uart_fifo_get_index = uart_fifo_insert_index = 0;
+  terminal_buffer_get_index = terminal_buffer_insert_index = 0;
 }
 
 /* TODO: Check for errors */
-void UART1_Send(char s[]){
-  HAL_UART_Transmit(huart1, (uint8_t *) s, strlen(s), 10);
+void UART1_Send(char s[]) {
+  HAL_UART_Transmit(&huart1, (uint8_t *)s, strlen(s), 10);
 }
 
-void USART1_IRQHandler(void)
-{
-  HAL_UART_IRQHandler(&huart1);
-}
+void USART1_IRQHandler(void) { HAL_UART_IRQHandler(&huart1); }
 
-/* This callback is called by the HAL_UART_IRQHandler when the given number of bytes are received */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-  if (huart->Instance == USART1)
-  {
+/* This callback is called by the HAL_UART_IRQHandler when the given number of
+ * bytes are received */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+  if (huart->Instance == USART1) {
     /* Receive one byte in interrupt mode */
     uint8_t index = ++terminal_buffer_get_index & (TIB_SIZE - 1);
     HAL_UART_Receive_IT(&huart1, &terminal_buffer[index], 1);
@@ -309,6 +306,14 @@ void _Error_Handler(char *file, int line) {
 __attribute__((naked)) void assert_failed(char const *file, int line) {
   /* TBD: damage control */
   NVIC_SystemReset(); /* reset the system */
+}
+
+void ForthError(const char *err_message) {
+  UART1_Send("Error: ");
+  UART1_Send(err_message);
+  UART1_Send("\n......Excuting QUIT......");
+  TIBFlush();
+  quit();
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

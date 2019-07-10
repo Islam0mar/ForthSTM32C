@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+Dictionary dict;
+
 DictionaryNode *makeDictionaryNode(DictionaryEntry item) {
   DictionaryNode *p;
 
@@ -116,5 +118,5 @@ bool addDictionaryEntry(char *name, uint8_t flags, uint8_t length, FuncPtr *ptr,
   entry.name = malloc(sizeof(char) * str_len);
   if (entry.name == NULL) return false;
   strncpy(entry.name, name, str_len);
-  return addToTail(entry, pd);
+  return addToHead(entry, pd);
 }
