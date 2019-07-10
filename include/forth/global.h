@@ -33,9 +33,15 @@ typedef void (*FuncPtr)(void);
 // clang-format on
 
 extern jmp_buf env;
-extern bool STATE; // false excyte, true compiling
-#define EXECUTE_STATE   !STATE  //  exe
-#define COMPILE_SATE    STATE  // cmp
+extern uint8_t state; // false excyte, true compiling
+#define F_EXE 0x01U
+#define F_CMP_FLASH 0x02U
+#define IS_EXE   ((state&F_EXE)!=0)  //  exe
+#define IS_CMP   ((state&F_EXE)==0)  //  exe
+#define IS_CMP_FLASH   ((state&F_CMP_FLASH)!=0)  //  exe
+#define IS_CMP_RAM   ((state&F_CMP_FLASH)==0)  //  exe
+extern void* here;
+extern void* data_ptr;
 // registers
 // register int *foo asm ("r12");
 // extern uint32_t TOS;  // top of the stack element

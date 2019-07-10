@@ -7,7 +7,6 @@
  * @Description: Modify Here, Please
  */
 
-
 #ifndef DICTIONARY_H
 #define DICTIONARY_H
 
@@ -17,11 +16,11 @@
 #include "global.h"
 
 // typedef enum { f_immediate, t_compile_only, t_hidden, t_idle } ForthTypes;
-#define F_IMMED   0x80U  // immediate
-#define F_COMPO   0x40U  // compile only
-#define F_HIDDEN  0x20U  // hidden
-#define F_FLASH   0x10U  // flash
-#define F_FUNC    0x01U  // contains one function
+#define F_IMMED 0x80U   // immediate
+#define F_COMPO 0x40U   // compile only
+#define F_HIDDEN 0x20U  // hidden
+#define F_FLASH 0x10U   // flash
+#define F_FUNC 0x01U    // contains one function
 
 typedef struct elementtype {
   char *name;  // maximum word length
@@ -40,11 +39,9 @@ typedef struct dictionarynode {
 typedef struct dictionary {
   DictionaryNode *head;
   DictionaryNode *tail;
-  uint32_t size;
 } Dictionary;
 
-extern Dictionary dict;
-
+Dictionary *GetDictPtr();
 DictionaryNode *makeDictionaryNode(DictionaryEntry item);
 bool addToTail(DictionaryEntry item, Dictionary *pd);
 DictionaryNode *findDictionaryItem(Dictionary *pd, char *name);

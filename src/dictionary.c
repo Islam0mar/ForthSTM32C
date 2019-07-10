@@ -13,8 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-Dictionary dict;
-
 DictionaryNode *makeDictionaryNode(DictionaryEntry item) {
   DictionaryNode *p;
 
@@ -58,10 +56,12 @@ bool addToHead(DictionaryEntry item, Dictionary *pd) {
 
 bool dictionaryEmpty(Dictionary *pd) { return pd->head == NULL; }
 
-void createDictionary(Dictionary *pd) {
-  pd->head = pd->tail = NULL;
-  pd->size = 0;
+Dictionary *GetDictPtr() {
+  static dict = {.head = NULL, .tail = NULL};
+  return &dict;
 }
+
+void createDictionary(Dictionary *pd) { pd->head = pd->tail = NULL; }
 
 int dictionarySize(Dictionary *pd) {
   int x;
