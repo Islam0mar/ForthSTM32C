@@ -125,7 +125,7 @@ DEFCODE(NULL, "LIT", 0, lit, "compile literals in forth word",
 // NEXT
 DEFCODE(NULL, ",", 0, comma,
         "( n -- ) writes the top element from the stack at DP", {
-          if (IS_CMP_FLASH) {
+          if (FORTH_IS_EXE_STATE) {
             
           } else {
             // HA

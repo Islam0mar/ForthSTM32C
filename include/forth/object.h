@@ -1,5 +1,9 @@
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#ifndef OBJECT_H
+#define OBJECT_H
+
+
+
+
 
 #include <setjmp.h> /* jmp_buf, setjmp, longjmp */
 #include <stdarg.h>
@@ -46,21 +50,9 @@ extern uint8_t state;  // false execute, true compiling
 extern void *here;
 extern void *data_ptr;
 
-/* struct { */
-/*   enum { is_int, is_float, is_char } type; */
-/*   union { */
-/*     int ival; */
-/*     float fval; */
-/*     char cval; */
-/*   } val; */
-/* } my_array[10]; */
-/* #define F_IMMED 0x80U   // immediate */
-/* #define F_COMPO 0x40U   // compile only */
-/* #define F_HIDDEN 0x20U  // hidden */
-/* #define F_FLASH 0x10U   // flash */
-/* #define F_FUNC 0x01U    // contains one function */
 
 typedef uint32_t ForthCell;
+typedef intptr_t ForthData;
 typedef ForthCell ForthFixNum;
 typedef char ForthCharacter;
 typedef size_t ForthIndex;
@@ -75,7 +67,7 @@ typedef enum {
   kBigNum = 3,
   kSingleFloat,
   kDoubleFloat,
-  kLongFloat,
+  kLongDoubleFloat,
   kArray,
   kString,
   /* kPointer, */
@@ -92,19 +84,19 @@ typedef enum {
   kFlash = 1 << 7,        // flash
 } ForthType;
 
-#define FORTH_IMMEDIATE(t) ((ForthFixNum)(t)&kFree)
-#define FORTH_FLAG(t) ((ForthFixNum)(t) & !kFree)
-#define FORTH_IS_IMMEDIATE(t) (FORTH_IMMEDIATE(t) <= kStructure)
-#define FORTH_IS_LIST(t) (FORTH_IMMEDIATE(t) == t_list)
+#define FORTH_TYPE_MASK(t) ((ForthFixNum)(t)&kFree)
+#define FORTH_FLAG_MASK(t) ((ForthFixNum)(t) & !kFree)
+#define FORTH_IS_IMMEDIATE(t) (FORTH_TYPE_MASK(t) <= kStructure)
+#define FORTH_IS_LIST(t) (FORTH_TYPE_MASK(t) == t_list)
 #define FORTH_IS_CONS(t) FORTH_LISTP(t)
-#define FORTH_IS_CMPO(t) ((FORTH_FLAG(t) & kCompileOnly) != 0)
-#define FORTH_IS_FLASH(t) ((FORTH_FLAG(t) & kFlash) != 0)
+#define FORTH_IS_CMPO(t) ((FORTH_FLAG_MASK(t) & kCompileOnly) != 0)
+#define FORTH_IS_FLASH(t) ((FORTH_FLAG_MASK(t) & kFlash) != 0)
 #define FORTH_IS_CODE(t) \
-  ((FORTH_IMMEDIATE(t) >= kByteCode) && (FORTH_IMMEDIATE(t) <= kCodeBlock))
+  ((FORTH_TYPE_MASK(t) >= kByteCode) && (FORTH_TYPE_MASK(t) <= kCodeBlock))
 
 typedef struct {
   ForthType type;
-  intptr_t data;
+  ForthData data;
 } _ForthObject;
 
 typedef _ForthObject *ForthObject;
@@ -114,27 +106,22 @@ typedef ForthFuncPtr[];
 typedef struct {
   ForthIndex size;   
   ForthObject *words;
-} ForthByteCode;
+} ForthVector;
 
 /* typedef struct { */
-/*   cl_object *stack; /\*  Is this relative to the lisp stack?  *\/ */
-/*   cl_object *base;  /\*  Start of frame  *\/ */
+/*   ForthObject *stack; /\*  Is this relative to the lisp stack?  *\/ */
+/*   ForthObject *base;  /\*  Start of frame  *\/ */
 /*   cl_index size;    /\*  Number of arguments  *\/ */
 /*   struct cl_env_struct *env; */
 /* } ForthStackFrame; */
 
 typedef struct {
-  cl_object car; /*  car  */
-  cl_object cdr; /*  cdr  */
+  ForthObject car; /*  car  */
+  ForthObject cdr; /*  cdr  */
 } ForthCons;
 
-#define ECL_CONS_CAR(x) ((x)->cons.car)
-#define ECL_CONS_CDR(x) ((x)->cons.cdr)
-#define Null(x) ((x) == ECL_NIL)
-#define CONS(a, d) ecl_cons((a), (d))
-#define ACONS(a, b, c) ecl_cons(ecl_cons((a), (b)), (c))
 
-ForthObject CreateForthObject(intptr_t data, ForthType t);
+ForthObject CreateForthObject(ForthData data, ForthType t);
 
 /* BEGIN-GENERATED (gen-cons-h) */
 ForthError(err);
@@ -143,7 +130,15 @@ void execute(ForthObject o){
   ForthType t = tos->type;
   if(FORTH_IS_IMMEDIATE(t)){
     tos = tos->data;
-  } else if(FORTH_IS_CODE(t)){
+  } else {
+    switch (t) {
+      case kCFun: {
+        
+        break;
+      }
+default:
+        break;
+    }
     tos = tos->data;
   }
 
@@ -168,16 +163,20 @@ void execute(ForthObject o){
   kFlash = 1 << 7,        // flash
 } ForthType;
 }
-#if ECL_CAN_INLINE
-static ECL_INLINE cl_object _ecl_car(cl_object x) {
-  if (Null(x)) return x;
-  x = ECL_CONS_CAR(x);
+#define FORTH_CONS_CAR(x) ((x)->cons.car)
+#define FORTH_CONS_CDR(x) ((x)->cons.cdr)
+#define CONS(a, d) ForthCons((a), (d))
+#define ACONS(a, b, c) ForthCons(ForthCons((a), (b)), (c))
+
+static inline ForthObject ForthCar(ForthObject x) {
+  if (x->data == NULL) return x;
+  x = FORTH_CONS_CAR(x->data);
   return x;
 }
 
-static ECL_INLINE cl_object _ecl_cdr(cl_object x) {
-  if (Null(x)) return x;
-  x = ECL_CONS_CDR(x);
+static inline ForthObject ForthCdr(ForthObject x) {
+  if (x->data == NULL) return x;
+  x = FORTH_CONS_CDR(x);
   return x;
 }
 
@@ -193,4 +192,7 @@ static ECL_INLINE cl_object _ecl_cdr(cl_object x) {
 // extern FuncPtr *IP;  // instruction pointer
 // extern FuncPtr W;    // working register
 
-#endif /* GLOBAL_H */
+#endif /* OBJECT_H */
+
+
+
