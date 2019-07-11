@@ -148,9 +148,9 @@ DEFCODE(NULL, "INTERPRET", 0, interpret, "Interpret inputs", {
   // word not found in dict
   if (tos == NULL) {
     if (EXECUTE_STATE) {  // exec
-      tos = StrToInt();
+      tos = StrToForthObj();
     } else {  // compile mode
-      tos = ;
+      tos = StrToForthObj();;
       comma();
       tos = StrToInt();
       comma();

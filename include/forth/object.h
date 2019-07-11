@@ -1,10 +1,6 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-
-
-
-
 #include <setjmp.h> /* jmp_buf, setjmp, longjmp */
 #include <stdarg.h>
 #include <stdint.h>
@@ -42,26 +38,29 @@ extern uint8_t state;  // false execute, true compiling
 
 #define F_EXE 0x01U
 #define F_CMP_FLASH 0x02U
-#define FORTH_IS_EXE_STATE ((state & F_EXE) != 0)              //  exe
-#define FORTH_IS_CMP_STATE ((state & F_EXE) == 0)              //  exe
+#define FORTH_IS_EXE_STATE ((state & F_EXE) != 0)           //  exe
+#define FORTH_IS_CMP_STATE ((state & F_EXE) == 0)           //  exe
 #define FORTH_IS_CMP_TO_FLASH ((state & F_CMP_FLASH) != 0)  //  exe
 #define FORTH_IS_CMP_TO_RAM ((state & F_CMP_FLASH) == 0)    //  exe
 
 extern void *here;
 extern void *data_ptr;
 
-
-typedef uint32_t ForthCell;
+typedef int32_t ForthCell;
 typedef intptr_t ForthData;
 typedef ForthCell ForthFixNum;
+typedef int64_t ForthBigNum;
 typedef char ForthCharacter;
 typedef size_t ForthIndex;
+
+#define FORTH_IS_FIXNUM_VAL(x) (x <= INT32_MAX && x >= INT_LEAST32_MAX)
+#define FORTH_IS_BIGNUM_VAL(x) (x <= INT64_MAX && x >= INT_LEAST64_MAX)
 
 /*
         Implementation types.
 */
 typedef enum {
-  kStart = 0,
+  kNull = 0,
   kList = 1,
   kFixNum = 2, /* immediate fixnum */
   kBigNum = 3,
@@ -104,8 +103,8 @@ typedef void (*ForthFuncPtr)(void);
 typedef ForthFuncPtr[];
 
 typedef struct {
-  ForthIndex size;   
-  ForthObject *words;
+  ForthIndex size;
+  ForthObject *word;
 } ForthVector;
 
 /* typedef struct { */
@@ -120,53 +119,20 @@ typedef struct {
   ForthObject cdr; /*  cdr  */
 } ForthCons;
 
-
-ForthObject CreateForthObject(ForthData data, ForthType t);
-
-/* BEGIN-GENERATED (gen-cons-h) */
-ForthError(err);
-
-void execute(ForthObject o){
-  ForthType t = tos->type;
-  if(FORTH_IS_IMMEDIATE(t)){
-    tos = tos->data;
-  } else {
-    switch (t) {
-      case kCFun: {
-        
-        break;
-      }
-default:
-        break;
-    }
-    tos = tos->data;
-  }
-
-  kFixNum = 2, /* immediate fixnum */
-  kBigNum = 3,
-  kSingleFloat,
-  kDoubleFloat,
-  kLongFloat,
-  kArray,
-  kString,
-  /* kPointer, */
-  kInstance, /* OOP */
-  kStructure = kInstance,
-  /* kSemaphore,  /\* multi tasking *\/ */
-  kByteCode,  /* derived words => array of forth objects*/
-  kCFun,      /* primitive words */
-  kCodeBlock, /* asssembler */
-  kMemBlock,  /* malloc mem */
-  kFrame,
-  kFree = 63,             /*  TODO: free object for GC   */
-  kCompileOnly = 1 << 6,  // compile only
-  kFlash = 1 << 7,        // flash
-} ForthType;
-}
-#define FORTH_CONS_CAR(x) ((x)->cons.car)
-#define FORTH_CONS_CDR(x) ((x)->cons.cdr)
-#define CONS(a, d) ForthCons((a), (d))
-#define ACONS(a, b, c) ForthCons(ForthCons((a), (b)), (c))
+ForthData ForthCreateData(ForthType t);
+ForthObject ForthCreateObject(ForthType t);
+ForthObject ForthCreateCons(ForthObject a, ForthObject b);
+ForthObject ForthCreateNull();
+#define FORTH_CONS_CAR(x) (((ForthCons *)x)->car)
+#define FORTH_CONS_CDR(x) (((ForthCons *)x)->cdr)
+#define CONS(a, d) ForthCreateCons((a), (d))
+#define ACONS(a, b, c) ForthCreateCons(ForthCreateCons((a), (b)), (c))
+#define FORTH_FIXNUM(x) (ForthFixNum)(x)
+#define FORTH_BIGNUM(x) (ForthBigNum)(*x)
+#define FORTH_SFLOAT(x) (float)(*x)
+#define FORTH_DFLOAT(x) (double)(*x)
+#define FORTH_LDFLOAT(x) (long double)(*x)
+#define FORTH_CFUN(x) (ForthFuncPtr)(*x)
 
 static inline ForthObject ForthCar(ForthObject x) {
   if (x->data == NULL) return x;
@@ -178,6 +144,33 @@ static inline ForthObject ForthCdr(ForthObject x) {
   if (x->data == NULL) return x;
   x = FORTH_CONS_CDR(x);
   return x;
+}
+
+void execute() {
+  ForthType t = tos->type;
+  if (FORTH_IS_IMMEDIATE(t)) {
+    tos = tos->data;
+  } else {
+    switch (FORTH_TYPE_MASK(t)) {
+      case kCFun: {
+        (*(ForthFuncPtr)(tos->data))();
+        break;
+      }
+      case kByteCode: {
+        static ForthVector *x;
+        static uint8_t i;
+        x = (ForthVector *)(tos->data);
+        PopTOS();
+        for (i = 0; i < x->size; i++) {
+          execute(x->word);
+        }
+        break;
+      }
+      default:
+        ForthError("cannot execute non-function");
+        break;
+    }
+  }
 }
 
 // registers
@@ -193,6 +186,3 @@ static inline ForthObject ForthCdr(ForthObject x) {
 // extern FuncPtr W;    // working register
 
 #endif /* OBJECT_H */
-
-
-

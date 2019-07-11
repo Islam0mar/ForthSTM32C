@@ -7,5 +7,4 @@
  */
 
 
-
-uint32_t StrToInt(const char* s);
+ForthObject StrToForthObj(const char* s);
