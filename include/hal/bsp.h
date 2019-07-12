@@ -15,10 +15,9 @@
 /*!< Vector Table base offset field. This value must be a multiple of 0x200. */
 #define VECT_TAB_OFFSET 0x00000000U
 
-
-extern uint32_t SystemCoreClock;          /*!< System Clock Frequency (Core Clock) */
-extern const uint8_t  AHBPrescTable[16];  /*!< AHB prescalers table values */
-extern const uint8_t  APBPrescTable[8];   /*!< APB prescalers table values */
+extern uint32_t SystemCoreClock; /*!< System Clock Frequency (Core Clock) */
+extern const uint8_t AHBPrescTable[16]; /*!< AHB prescalers table values */
+extern const uint8_t APBPrescTable[8];  /*!< APB prescalers table values */
 
 // #include "stm32f1xx_hal_conf.h"
 // #include "stm32f1xx_hal_uart.h"
@@ -36,6 +35,8 @@ void Init();
 void UART1_Send(char s[]);
 extern void SystemInit(void);
 extern void SystemCoreClockUpdate(void);
-void ForthError(const char *err_message);
+static inline void SendErrorMsg(const char *err_message) {
+  UART1_Send(err_message);
+}
 
 #endif /* BSP_H */

@@ -9,30 +9,6 @@
 // /*
 // 	The built-in variables are:
 
-// 	STATE		Is the interpreter executing code (0) or compiling a
-// word (non-zero)?
-// 	LATEST		Points to the latest (most recently defined) word in the
-// dictionary.
-// 	DP		Points to the next free byte of memory.  When compiling,
-// compiled words go here. 	S0		Stores the address of the top of
-// the parameter stack. 	BASE		The current base for printing
-// and reading numbers.
-
-// 	*/
-// 	/* RAM vector table*/
-
-// 	defvar "STATE",5,,STATE
-// 	defvar "DP",2,,DP
-// 	defvar "FLASH",5,,FLASH		// latest flash position
-// 	defvar "RAM",3,,RAM			// latest ram position
-// 	defvar "LATEST",6,,LATEST,name_QUIT @ latest defined word
-// 	defvar "F_LATEST",8,,F_LATEST,name_QUIT @ latest defined word FLASH
-// 	defvar "BASE",4,,BASE,10
-// 	defvar "S0",2,,SZ,__stack_end__
-// 	defvar "R0",2,,RZ,return_stack_top
-// 	defvar "BOOT",4,,BOOT,QUIT
-// clang-format on
-
 extern jmp_buf env;
 extern uint8_t state;  // false execute, true compiling
 
@@ -46,9 +22,8 @@ extern uint8_t state;  // false execute, true compiling
 extern void *here;
 extern void *data_ptr;
 
-typedef int32_t ForthCell;
 typedef intptr_t ForthData;
-typedef ForthCell ForthFixNum;
+typedef int32_t ForthFixNum;
 typedef int64_t ForthBigNum;
 typedef char ForthCharacter;
 typedef size_t ForthIndex;
@@ -96,11 +71,11 @@ typedef enum {
 typedef struct {
   ForthType type;
   ForthData data;
-} _ForthObject;
+} ForthObject;
 
-typedef _ForthObject *ForthObject;
+typedef ForthObject ForthCell;
 typedef void (*ForthFuncPtr)(void);
-typedef ForthFuncPtr[];
+/* typedef ForthFuncPtr[]; */
 
 typedef struct {
   ForthIndex size;
@@ -127,39 +102,39 @@ ForthObject ForthCreateNull();
 #define FORTH_CONS_CDR(x) (((ForthCons *)x)->cdr)
 #define CONS(a, d) ForthCreateCons((a), (d))
 #define ACONS(a, b, c) ForthCreateCons(ForthCreateCons((a), (b)), (c))
-#define FORTH_FIXNUM(x) (ForthFixNum)(x)
-#define FORTH_BIGNUM(x) (ForthBigNum)(*x)
-#define FORTH_SFLOAT(x) (float)(*x)
-#define FORTH_DFLOAT(x) (double)(*x)
-#define FORTH_LDFLOAT(x) (long double)(*x)
-#define FORTH_CFUN(x) (ForthFuncPtr)(*x)
+#define FORTH_FIXNUM(x) ((ForthFixNum)(x))
+#define FORTH_BIGNUM(x) ((ForthBigNum)(*x))
+#define FORTH_SFLOAT(x) ((float)(*x))
+#define FORTH_DFLOAT(x) ((double)(*x))
+#define FORTH_LDFLOAT(x) ((long double)(*x))
+#define FORTH_CFUN(x) ((ForthFuncPtr)(*x))
 
 static inline ForthObject ForthCar(ForthObject x) {
-  if (x->data == NULL) return x;
-  x = FORTH_CONS_CAR(x->data);
+  if (x.data == NULL) return x;
+  x = FORTH_CONS_CAR(x.data);
   return x;
 }
 
 static inline ForthObject ForthCdr(ForthObject x) {
-  if (x->data == NULL) return x;
+  if (x.data == NULL) return x;
   x = FORTH_CONS_CDR(x);
   return x;
 }
 
 void execute() {
-  ForthType t = tos->type;
+  ForthType t = tos.type;
   if (FORTH_IS_IMMEDIATE(t)) {
-    tos = tos->data;
+    tos = tos.data;
   } else {
     switch (FORTH_TYPE_MASK(t)) {
       case kCFun: {
-        (*(ForthFuncPtr)(tos->data))();
+        (*(ForthFuncPtr)(tos.data))();
         break;
       }
       case kByteCode: {
         static ForthVector *x;
         static uint8_t i;
-        x = (ForthVector *)(tos->data);
+        x = (ForthVector *)(tos.data);
         PopTOS();
         for (i = 0; i < x->size; i++) {
           execute(x->word);
@@ -167,7 +142,7 @@ void execute() {
         break;
       }
       default:
-        ForthError("cannot execute non-function");
+        ForthError("CANNOT EXECUTE WORD", itoa(tos.data, 16));
         break;
     }
   }

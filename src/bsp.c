@@ -308,12 +308,4 @@ __attribute__((naked)) void assert_failed(char const *file, int line) {
   NVIC_SystemReset(); /* reset the system */
 }
 
-void ForthError(const char *err_message) {
-  UART1_Send("Error: ");
-  UART1_Send(err_message);
-  UART1_Send("\n......Excuting QUIT......");
-  TIBFlush();
-  quit();
-}
-
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

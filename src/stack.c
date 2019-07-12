@@ -45,16 +45,16 @@ StackEntry tos = 0;
 void PopPSP(StackEntry *item_ptr) {
   if (!StackEmpty(STACK_PTR)) {
     Pop(item_ptr, STACK_PTR);
-  } else{
-    ForthError("stack under flow");
+  } else {
+    ForthError("STACK UNDERFLOW", "POP");
   }
 }
 
 void PushPSP(StackEntry item) {
   if (!StackFull(STACK_PTR)) {
     Push(item, STACK_PTR);
-  } else{
-    ForthError("stack over flow");
+  } else {
+    ForthError("STACK OVERFLOW", "PUSH");
   }
 }
 

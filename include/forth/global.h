@@ -137,7 +137,6 @@ typedef struct {
 ForthObject CreateForthObject(intptr_t data, ForthType t);
 
 /* BEGIN-GENERATED (gen-cons-h) */
-ForthError(err);
 
 void execute(ForthObject o){
   ForthType t = tos->type;

@@ -6,15 +6,40 @@
  *
  */
 #include <ctype.h>
+#include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "forth/aux.h"
+#include "forth/parse.h"
 
-ForthObject StrToForthObj(const char* s) {
-  static char* end;
-  static void* r;
+char *itoa(int val, int base) {
+  static char buf[32] = {0};
+
+  int i = 30;
+
+  for (; val && i; --i, val /= base) {
+    buf[i] = "0123456789abcdef"[val % base];
+  }
+
+  return &buf[i + 1];
+}
+
+void ForthError(const char *err_message, const char *word) {
+  SendErrorMsg("Error: ");
+  const char *fmt = "%s, <%s>.\n";
+  const int kSize = snprintf(NULL, 0, fmt, err_message, word);
+  char buf[kSize + 1];  // note +1 for terminating null byte
+  snprintf(buf, sizeof buf, fmt, err_message, word);
+  SendErrorMsg(buf);
+  SendErrorMsg("Excuting QUIT...");
+  TIBFlush();
+  quit();
+}
+
+ForthObject StrToForthObj(const char *s) {
+  static char *end;
+  static void *r;
   static uint8_t i;
   static ForthType t;
   static float f;
@@ -57,21 +82,16 @@ ForthObject StrToForthObj(const char* s) {
         t = kFixNum;
       } else if (FORTH_IS_BIGNUM_VAL(ll)) {
         t = kBigNum;
+      } else {
+        errno = ERANGE;
       }
       break;
   }
   if (errno == ERANGE) {
     errno = 0;
-    char err[PAD_SIZE + 17] = "RANGE ERROR, <";
-    strcat(err, pad);
-    strcat(err, ">.");
-    ForthError(err);
+    ForthError("RANGE ERROR", pad);
   } else if (end != NULL) {  // not integer
-
-    char err[PAD_SIZE + 20] = "NOT RECOGNIZED, <";
-    strcat(err, pad);
-    strcat(err, ">.");
-    ForthError(err);
+    ForthError("NOT RECOGNIZED", pad);
   }
   return ForthCreateObject((ForthData)r, t);
 }
