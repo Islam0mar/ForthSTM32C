@@ -1,72 +1,46 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include <setjmp.h> /* jmp_buf, setjmp, longjmp */
-#include <stdarg.h>
-#include <stdint.h>
-#include <string.h>
-
-// /*
-// 	The built-in variables are:
-
-extern jmp_buf env;
-extern uint8_t state;  // false execute, true compiling
-
-#define F_EXE 0x01U
-#define F_CMP_FLASH 0x02U
-#define FORTH_IS_EXE_STATE ((state & F_EXE) != 0)           //  exe
-#define FORTH_IS_CMP_STATE ((state & F_EXE) == 0)           //  exe
-#define FORTH_IS_CMP_TO_FLASH ((state & F_CMP_FLASH) != 0)  //  exe
-#define FORTH_IS_CMP_TO_RAM ((state & F_CMP_FLASH) == 0)    //  exe
-
-extern void *here;
-extern void *data_ptr;
-
-typedef intptr_t ForthData;
-typedef int32_t ForthFixNum;
-typedef int64_t ForthBigNum;
-typedef char ForthCharacter;
-typedef size_t ForthIndex;
-
-#define FORTH_IS_FIXNUM_VAL(x) (x <= INT32_MAX && x >= INT_LEAST32_MAX)
-#define FORTH_IS_BIGNUM_VAL(x) (x <= INT64_MAX && x >= INT_LEAST64_MAX)
+#include "global.h"
 
 /*
         Implementation types.
 */
 typedef enum {
-  kNull = 0,
-  kList = 1,
+  kCons = 0,
   kFixNum = 2, /* immediate fixnum */
   kBigNum = 3,
   kSingleFloat,
   kDoubleFloat,
   kLongDoubleFloat,
-  kArray,
-  kString,
-  /* kPointer, */
-  kInstance, /* OOP */
-  kStructure = kInstance,
-  /* kSemaphore,  /\* multi tasking *\/ */
-  kByteCode,  /* derived words => array of forth objects*/
-  kCFun,      /* primitive words */
-  kCodeBlock, /* asssembler */
-  kMemBlock,  /* malloc mem */
-  kFrame,
-  kFree = 63,             /*  TODO: free object for GC   */
-  kCompileOnly = 1 << 6,  // compile only
-  kFlash = 1 << 7,        // flash
+  kVector,
+  kPointer,
+  kTypeMask = 31,
+  kExecutable = 1 << 4,  /*  executable code   */
+  kFree = 1 << 5,        /*  TODO: free object for GC   */
+  kCompileOnly = 1 << 6, /* compile only */
+  kFlash = 1 << 7,       /* flash */
 } ForthType;
 
-#define FORTH_TYPE_MASK(t) ((ForthFixNum)(t)&kFree)
-#define FORTH_FLAG_MASK(t) ((ForthFixNum)(t) & !kFree)
-#define FORTH_IS_IMMEDIATE(t) (FORTH_TYPE_MASK(t) <= kStructure)
-#define FORTH_IS_LIST(t) (FORTH_TYPE_MASK(t) == t_list)
-#define FORTH_IS_CONS(t) FORTH_LISTP(t)
-#define FORTH_IS_CMPO(t) ((FORTH_FLAG_MASK(t) & kCompileOnly) != 0)
-#define FORTH_IS_FLASH(t) ((FORTH_FLAG_MASK(t) & kFlash) != 0)
-#define FORTH_IS_CODE(t) \
-  ((FORTH_TYPE_MASK(t) >= kByteCode) && (FORTH_TYPE_MASK(t) <= kCodeBlock))
+#define FORTH_IS_FIXNUM_VAL(x) (x <= INT32_MAX && x >= INT_LEAST32_MAX)
+#define FORTH_IS_BIGNUM_VAL(x) (x <= INT64_MAX && x >= INT_LEAST64_MAX)
+#define FORTH_TYPE_MASK(t) ((ForthFixNum)(t)&kTypeMask)
+#define FORTH_FLAG_MASK(t) ((ForthFixNum)(t) & !kTypeMask)
+#define FORTH_IS_IMMEDIATE(o) (FORTH_TYPE_MASK(o.type) == kFixNum)
+#define FORTH_IS_CONS(o) (FORTH_TYPE_MASK(o.type) == kCons)
+#define FORTH_IS_CMPO(o) ((FORTH_FLAG_MASK(o.type) & kCompileOnly) != 0)
+#define FORTH_IS_FLASH(o) ((FORTH_FLAG_MASK(o.type) & kFlash) != 0)
+#define FORTH_IS_CODE(o) ((FORTH_FLAG_MASK(o.type) & kExecutable) != 0)
+
+typedef struct {
+  ForthIndex size;
+  ForthObject *word;
+} ForthVector;
+
+typedef struct {
+  ForthObject car; /*  car  */
+  ForthObject cdr; /*  cdr  */
+} ForthCons;
 
 typedef struct {
   ForthType type;
@@ -74,30 +48,22 @@ typedef struct {
 } ForthObject;
 
 typedef ForthObject ForthCell;
-typedef void (*ForthFuncPtr)(void);
-/* typedef ForthFuncPtr[]; */
-
-typedef struct {
-  ForthIndex size;
-  ForthObject *word;
-} ForthVector;
-
-/* typedef struct { */
-/*   ForthObject *stack; /\*  Is this relative to the lisp stack?  *\/ */
-/*   ForthObject *base;  /\*  Start of frame  *\/ */
-/*   cl_index size;    /\*  Number of arguments  *\/ */
-/*   struct cl_env_struct *env; */
-/* } ForthStackFrame; */
-
-typedef struct {
-  ForthObject car; /*  car  */
-  ForthObject cdr; /*  cdr  */
-} ForthCons;
 
 ForthData ForthCreateData(ForthType t);
-ForthObject ForthCreateObject(ForthType t);
+ForthObject ForthCreateEmptyObject(ForthType t);
 ForthObject ForthCreateCons(ForthObject a, ForthObject b);
 ForthObject ForthCreateNull();
+ForthObject ForthCreateFixNum(ForthFixNum x);
+ForthObject ForthCreateBigNum(ForthBigNum x);
+ForthObject ForthCreateSingleFloat(float x);
+ForthObject ForthCreateDoubleFloat(double x);
+ForthObject ForthCreateLongDoubleFloat(long double x);
+ForthObject ForthCreateEmptyVector();
+ForthObject ForthCreateVector(ForthObject x);
+void ForthAddToVector(ForthObject x, ForthVector *v);
+ForthObject ForthCreateObject(ForthData x, ForthType t);
+void ForthRemoveObject(ForthObject obj);
+
 #define FORTH_CONS_CAR(x) (((ForthCons *)x)->car)
 #define FORTH_CONS_CDR(x) (((ForthCons *)x)->cdr)
 #define CONS(a, d) ForthCreateCons((a), (d))
@@ -147,17 +113,5 @@ void execute() {
     }
   }
 }
-
-// registers
-// register int *foo asm ("r12");
-// extern uint32_t TOS;  // top of the stack element
-// extern uint32_t PSP;  // parameter stack index
-// extern uint32_t RSP;  // return stack index
-// size_t PSP;    // parameter stack index
-// size_t RSP;    // return stack index
-// extern uint32_t PS[MAXSTACK];
-// extern uint32_t RS[MAXRSTACK];
-// extern FuncPtr *IP;  // instruction pointer
-// extern FuncPtr W;    // working register
 
 #endif /* OBJECT_H */

@@ -27,20 +27,16 @@ static inline void *ForthRealloc(ForthData d, ForthIndex s) {
 ForthData ForthCreateData(ForthType t) {
   static ForthData data = NULL;
   switch (FORTH_TYPE_MASK(t)) {
-    case kNull: {
-      data = NULL;
-      break;
-    }
-    case kList: {
+    case kCons: {
       data = ForthAlloc(sizeof(ForthCons));
       break;
     }
     case kFixNum: {
-      /* data = -1; */
+      data = -1;
       break;
     }
     case kBigNum: {
-      data = ForthAlloc(sizeof(int64_t));
+      data = ForthAlloc(sizeof(ForthBigNum));
       break;
     }
     case kSingleFloat: {
@@ -59,41 +55,10 @@ ForthData ForthCreateData(ForthType t) {
       data = ForthAlloc(sizeof(ForthVector));
       break;
     }
-    case kString: {
-      data = ForthAlloc(sizeof(ForthVector));
+    case kPointer: {
+      data = NULL;
       break;
     }
-    case kInstance: {
-      data = ForthAlloc(sizeof(ForthVector));
-      break;
-    }
-    case kByteCode: {
-      data = ForthAlloc(sizeof(ForthVector));
-      break;
-    }
-    case kCFun: {
-      /* data = &d; */
-      data = ForthAlloc(sizeof(ForthFuncPtr));
-      break;
-    }
-    case kCodeBlock: {
-      data = ForthAlloc(sizeof(ForthFuncPtr));
-      /* data = int(*f)(); */
-      /* f = (int (*)()) & RawCode; */
-      /* (int)(*f)(); */
-      break;
-    }
-    case kMemBlock: {
-      data = ForthAlloc(sizeof(ForthFuncPtr));
-      /* data = int(*f)(); */
-      /* f = (int (*)()) & RawCode; */
-      /* (int)(*f)(); */
-      break;
-    }
-    /* case kFrame: { */
-    /*   /\* data = ForthAlloc(size * sizeof(ForthStackFrame)) *\/ */
-    /*   break; */
-    /* } */
     default:
       ForthError("UNKNOWN TYPE", "ForthCreateData");
       break;
@@ -103,23 +68,20 @@ ForthData ForthCreateData(ForthType t) {
 
 ForthObject ForthCreateEmptyObject(ForthType t) {
   static ForthObject obj;
-  if (FORTH_IS_CMP_TO_RAM) {
-    obj.type = t;
-    obj.data = CreateForthData(t);
-  } else {
-  }
+  obj.type = t;
+  obj.data = CreateForthData(t);
   return obj;
 }
 
 ForthObject ForthCreateCons(ForthObject a, ForthObject b) {
-  static ForthObject obj = ForthCreateEmptyObject(kList);
+  static ForthObject obj = ForthCreateEmptyObject(kCons);
   FORTH_CONS_CAR(x.data) = a;
   FORTH_CONS_CDR(x.data) = b;
   return obj;
 }
 
 ForthObject ForthCreateNull() {
-  static ForthObject obj = ForthCreateEmptyObject(kNull);
+  static ForthObject obj = ForthCreateEmptyObject(kPointer);
   return obj;
 }
 
@@ -167,26 +129,17 @@ ForthObject ForthCreateVector(ForthObject x) {
   return obj;
 }
 
-ForthObject ForthCreateCFun(ForthFuncPtr x) {
-  ForthObject obj = ForthCreateEmptyObject(kCFun);
-  *obj.data = x;
-  return obj;
-}
-
 void ForthAddToVector(ForthObject x, ForthVector *v) {
-  v->word = ForthRealloc(v->word, sizeof(v->word) + sizeof(x));
-  v->word[size] = x;
   v->size++;
+  v->word = ForthRealloc(v->word, v->size * sizeof(x));
+  v->word[v->size - 1] = x;
 }
 
 ForthObject ForthCreateObject(ForthData x, ForthType t) {
   static ForthObject obj = NULL;
   switch (FORTH_TYPE_MASK(t)) {
-    case kNull: {
-      obj = ForthCreateNull();
-      break;
-    }
-    case kList: {
+    case kCons: {
+      /* TODO: Unused!! */
       obj = CONS((ForthObject)x, ForthCreateNull());
       break;
     }
@@ -214,131 +167,56 @@ ForthObject ForthCreateObject(ForthData x, ForthType t) {
       obj = ForthCreateVector((ForthObject)x);
       break;
     }
-    case kString: {
-      uint8_t i = 0;
-      obj = ForthCreateEmptyVector();
-      for (; x[i] != '\0'; i++) {
-        ForthAddToVector(ForthCreateObject(x[i], kFixNum),
-                         (ForthVector *)obj.data);
-      }
+    case kPointer: {
+      obj.t = t;
+      obj.data = x;
       break;
     }
-    /* case kInstance: { */
-    /*   obj = ForthCreate(FORTH_); */
-    /*   break; */
-    /* } */
-    case kByteCode: {
-      obj = ForthCreateVector((ForthObject)x);
-      break;
-    }
-    case kCFun: {
-      /* data = &d; */
-      obj = ForthCreateCFun(FORTH_CFUN(x));
-      break;
-    }
-      /* case kCodeBlock: { */
-      /*   obj = ForthCreate(FORTH_); */
-      /*   /\* data = int(*f)(); *\/ */
-      /*   /\* f = (int (*)()) & RawCode; *\/ */
-      /*   /\* (int)(*f)(); *\/ */
-      /*   break; */
-      /* } */
-      /* case kMemBlock: { */
-      /*   obj = ForthCreate(FORTH_); */
-      /*   /\* data = int(*f)(); *\/ */
-      /*   /\* f = (int (*)()) & RawCode; *\/ */
-      /*   /\* (int)(*f)(); *\/ */
-      /*   break; */
-      /* } */
-      /* case kFrame: { */
-      /* obj = ForthCreate(FORTH_); */
-    /*   break; */
-    /* } */
     default:
       ForthError("UNKNOWN TYPE", "ForthCreateObject");
       break;
   }
   return obj;
 }
-/* ForthData ForthCopyDataRecursive(ForthObject src, ForthObject dist) { */
-/*   switch (FORTH_TYPE_MASK(src->t)) { */
-/*     case kNull: { */
-/*       src.data = NULL; */
-/*       break; */
-/*     } */
-/*     case kList: { */
-/*       static ForthObject x; */
-/*       for (x = ForthCar(src); x->t != kNull; x = ForthCar(ForthCdr(x))) {
- */
-/*         ForthCopyDataRecursive(x, x); */
-/*       } */
-/*       data = ForthRealloc(dist, sizeof(ForthCons)); */
-/*       break; */
-/*     } */
-/*     case kFixNum: { */
-/*       /\* data = -1; *\/ */
-/*       break; */
-/*     } */
-/*     case kBigNum: { */
-/*       data = ForthRealloc(dist, sizeof(int64_t)); */
-/*       break; */
-/*     } */
-/*     case kSingleFloat: { */
-/*       data = ForthRealloc(dist, sizeof(float)); */
-/*       break; */
-/*     } */
-/*     case kDoubleFloat: { */
-/*       data = ForthRealloc(dist, sizeof(double)); */
-/*       break; */
-/*     } */
-/*     case kLongDoubleFloat: { */
-/*       data = ForthRealloc(dist, sizeof(long double)); */
-/*       break; */
-/*     } */
-/*     case kVector: { */
-/*       data = ForthRealloc(dist, sizeof(ForthVector)); */
-/*       break; */
-/*     } */
-/*     case kString: { */
-/*       data = ForthRealloc(dist, sizeof(ForthVector)); */
-/*       break; */
-/*     } */
-/*     case kInstance: { */
-/*       data = ForthRealloc(dist, sizeof(ForthVector)); */
-/*       break; */
-/*     } */
-/*     case kByteCode: { */
-/*       data = ForthRealloc(dist, sizeof(ForthVector)); */
-/*       break; */
-/*     } */
-/*     case kCFun: { */
-/*       /\* data = &d; *\/ */
-/*       data = ForthRealloc(dist, sizeof(ForthFuncPtr)); */
-/*       break; */
-/*     } */
-/*     case kCodeBlock: { */
-/*       data = ForthRealloc(dist, sizeof(ForthFuncPtr)); */
-/*       /\* data = int(*f)(); *\/ */
-/*       /\* f = (int (*)()) & RawCode; *\/ */
-/*       /\* (int)(*f)(); *\/ */
-/*       break; */
-/*     } */
-/*     case kMemBlock: { */
-/*       data = ForthRealloc(dist, sizeof(ForthFuncPtr)); */
-/*       /\* data = int(*f)(); *\/ */
-/*       /\* f = (int (*)()) & RawCode; *\/ */
-/*       /\* (int)(*f)(); *\/ */
-/*       break; */
-/*     } */
-/*     /\* case kFrame: { *\/ */
-/*     /\*   /\\* data = ForthRealloc(dist,size * sizeof(ForthStackFrame))
- * *\\/
- * *\/ */
-/*     /\*   break; *\/ */
-/*     /\* } *\/ */
-/*     default: */
-/*             ForthError("UNKNOWN TYPE", "ForthCreateObject");*/
-/*       break; */
-/*   } */
-/*   return data; */
-/* } */
+void ForthRemoveObject(ForthObject obj) {
+  switch (FORTH_TYPE_MASK(obj->t)) {
+    case kCons: {
+      ForthData d = obj->data;
+      ForthRemoveObject(FORTH_CONS_CAR(d));
+      ForthRemoveObject(FORTH_CONS_CDR(d));
+      free(d);
+      break;
+    }
+    case kFixNum: {
+      break;
+    }
+    case kBigNum: {
+      free(obj->data);
+      break;
+    }
+    case kSingleFloat: {
+      free(obj->data);
+      break;
+    }
+    case kDoubleFloat: {
+      free(obj->data);
+      break;
+    }
+    case kLongDoubleFloat: {
+      free(obj->data);
+      break;
+    }
+    case kVector: {
+      free(obj->data);
+      break;
+    }
+    case kPointer: {
+      free(obj->data);
+      break;
+    }
+    default:
+      ForthError("UNKNOWN TYPE", "ForthRemoveObject");
+      break;
+  }
+}
+

@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-DictionaryNode *makeDictionaryNode(DictionaryEntry item) {
+DictionaryNode *MakeDictionaryNode(DictionaryEntry item) {
   DictionaryNode *p;
 
   p = (DictionaryNode *)malloc(sizeof(DictionaryNode));
@@ -24,7 +24,7 @@ DictionaryNode *makeDictionaryNode(DictionaryEntry item) {
   return p;
 }
 
-bool addToTail(DictionaryEntry item, Dictionary *pd) {
+bool AddToTail(DictionaryEntry item, Dictionary *pd) {
   DictionaryNode *p = makeDictionaryNode(item);
   if (p == NULL) {
     return false;
@@ -39,7 +39,7 @@ bool addToTail(DictionaryEntry item, Dictionary *pd) {
   return true;
 }
 
-bool addToHead(DictionaryEntry item, Dictionary *pd) {
+bool AddToHead(DictionaryEntry item, Dictionary *pd) {
   DictionaryNode *p = makeDictionaryNode(item);
   if (p == NULL) {
     return false;
@@ -54,23 +54,23 @@ bool addToHead(DictionaryEntry item, Dictionary *pd) {
   return true;
 }
 
-bool dictionaryEmpty(Dictionary *pd) { return pd->head == NULL; }
+bool DictionaryEmpty(Dictionary *pd) { return pd->head == NULL; }
 
 Dictionary *GetDictPtr() {
   static dict = {.head = NULL, .tail = NULL};
   return &dict;
 }
 
-void createDictionary(Dictionary *pd) { pd->head = pd->tail = NULL; }
+void CreateDictionary(Dictionary *pd) { pd->head = pd->tail = NULL; }
 
-int dictionarySize(Dictionary *pd) {
+int DictionarySize(Dictionary *pd) {
   int x;
   DictionaryNode *ptrs = pd->head;
   for (x = 0; ptrs; ptrs = ptrs->next) x++;
   return x;
 }
 
-void clearDictionary(Dictionary *pd) {
+void ClearDictionary(Dictionary *pd) {
   DictionaryNode *p = pd->head;
   while (p) {
     p = p->next;
@@ -80,7 +80,7 @@ void clearDictionary(Dictionary *pd) {
   pd->tail = pd->head;
 }
 
-DictionaryNode *findDictionaryItem(Dictionary *pd, char *name) {
+DictionaryNode *FindDictionaryItem(Dictionary *pd, char *name) {
   DictionaryNode *p = pd->head;
   for (; p; p = p->next) {
     if (strcmp(name, p->entry.name) == 0) {
@@ -90,12 +90,12 @@ DictionaryNode *findDictionaryItem(Dictionary *pd, char *name) {
   return NULL;
 }
 
-bool deleteDictionaryItem(Dictionary *pd, char *name) {
+bool DeleteDictionaryItem(Dictionary *pd, char *name) {
   DictionaryNode *p = pd->head;
   DictionaryNode *prev_p = NULL;
   for (; p; p = p->next) {
     if (strcmp(name, p->entry.name) == 0) {
-      if ((p->entry.flags & F_FLASH) != 0) {
+      if (FORTH_IS_FLASH(p->entry)) {
         // TODO: remove flash
         return false;
       } else {
@@ -111,12 +111,17 @@ bool deleteDictionaryItem(Dictionary *pd, char *name) {
   return false;
 }
 
-bool addDictionaryEntry(char *name, uint8_t flags, uint8_t length, FuncPtr *ptr,
-                        Dictionary *pd) {
-  DictionaryEntry entry = {.flags = flags, .length = length, .ptr = ptr};
-  const size_t str_len = strlen(name) + 1;
-  entry.name = malloc(sizeof(char) * str_len);
-  if (entry.name == NULL) return false;
-  strncpy(entry.name, name, str_len);
-  return addToHead(entry, pd);
+bool AddToDictionary(char *name, ForthObject obj, Dictionary *pd) {
+  DictionaryNode *node = FindDictionaryItem(name, pd);
+  if (node != NULL) {
+    ForthWarning("Word overwritten", name);
+    node->object = obj;
+  } else {
+    DictionaryEntry entry = {.object = obj};
+    const size_t str_len = strlen(name) + 1;
+    entry.name = malloc(sizeof(char) * str_len);
+    if (entry.name == NULL) return false;
+    strncpy(entry.name, name, str_len);
+    return addToHead(entry, pd);
+  }
 }

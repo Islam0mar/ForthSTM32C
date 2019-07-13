@@ -5,11 +5,6 @@
  *  Detailed description
  *
  */
-#include <ctype.h>
-#include <errno.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "forth/parse.h"
 
@@ -26,14 +21,25 @@ char *itoa(int val, int base) {
 }
 
 void ForthError(const char *err_message, const char *word) {
-  SendErrorMsg("Error: ");
+  SendMsg("Error: ");
   const char *fmt = "%s, <%s>.\n";
   const int kSize = snprintf(NULL, 0, fmt, err_message, word);
   char buf[kSize + 1];  // note +1 for terminating null byte
   snprintf(buf, sizeof buf, fmt, err_message, word);
-  SendErrorMsg(buf);
-  SendErrorMsg("Excuting QUIT...");
+  SendMsg(buf);
+  SendMsg("Excuting QUIT...");
   TIBFlush();
+  quit();
+}
+
+void ForthWarning(const char *err_message, const char *word) {
+  SendMsg("Warning: ");
+  const char *fmt = "%s, <%s>.\n";
+  const int kSize = snprintf(NULL, 0, fmt, err_message, word);
+  char buf[kSize + 1];  // note +1 for terminating null byte
+  snprintf(buf, sizeof buf, fmt, err_message, word);
+  SendMsg(buf);
+  SendMsg("Executing continues...");
   quit();
 }
 

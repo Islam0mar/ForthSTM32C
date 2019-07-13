@@ -10,15 +10,15 @@
 
 #include "global.h"
 
-typedef StackEntry uint32_t;
+typedef ForthObject StackEntry;
 
 #define MAXSTACK 512U
 
 extern StackEntry tos;
 
-typedef struct stack{
-	uint32_t top;
-	StackEntry entry[MAXSTACK];
+typedef struct stack {
+  uint16_t top;
+  StackEntry entry[MAXSTACK];
 } Stack;
 
 void PopPSP(StackEntry*);
@@ -26,7 +26,6 @@ void PushPSP(StackEntry);
 
 #define PopTOS() PopPSP(&tos)
 #define PushTOS() PushPSP(tos)
-
 
 // void	Push			(StackEntry, Stack *);
 // void	Pop				(StackEntry *, Stack *);

@@ -35,8 +35,6 @@ void Init();
 void UART1_Send(char s[]);
 extern void SystemInit(void);
 extern void SystemCoreClockUpdate(void);
-static inline void SendErrorMsg(const char *err_message) {
-  UART1_Send(err_message);
-}
+static inline void SendMsg(const char *msg) { UART1_Send(msg); }
 
 #endif /* BSP_H */
