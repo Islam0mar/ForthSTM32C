@@ -3,25 +3,6 @@
 
 #include "global.h"
 
-/*
-        Implementation types.
-*/
-typedef enum {
-  kCons = 0,
-  kFixNum = 2, /* immediate fixnum */
-  kBigNum = 3,
-  kSingleFloat,
-  kDoubleFloat,
-  kLongDoubleFloat,
-  kVector,
-  kPointer,
-  kTypeMask = 31,
-  kExecutable = 1 << 4,  /*  executable code   */
-  kFree = 1 << 5,        /*  TODO: free object for GC   */
-  kCompileOnly = 1 << 6, /* compile only */
-  kFlash = 1 << 7,       /* flash */
-} ForthType;
-
 #define FORTH_IS_FIXNUM_VAL(x) (x <= INT32_MAX && x >= INT_LEAST32_MAX)
 #define FORTH_IS_BIGNUM_VAL(x) (x <= INT64_MAX && x >= INT_LEAST64_MAX)
 #define FORTH_TYPE_MASK(t) ((ForthFixNum)(t)&kTypeMask)
@@ -31,23 +12,6 @@ typedef enum {
 #define FORTH_IS_CMPO(o) ((FORTH_FLAG_MASK(o.type) & kCompileOnly) != 0)
 #define FORTH_IS_FLASH(o) ((FORTH_FLAG_MASK(o.type) & kFlash) != 0)
 #define FORTH_IS_CODE(o) ((FORTH_FLAG_MASK(o.type) & kExecutable) != 0)
-
-typedef struct {
-  ForthIndex size;
-  ForthObject *word;
-} ForthVector;
-
-typedef struct {
-  ForthObject car; /*  car  */
-  ForthObject cdr; /*  cdr  */
-} ForthCons;
-
-typedef struct {
-  ForthType type;
-  ForthData data;
-} ForthObject;
-
-typedef ForthObject ForthCell;
 
 ForthData ForthCreateData(ForthType t);
 ForthObject ForthCreateEmptyObject(ForthType t);

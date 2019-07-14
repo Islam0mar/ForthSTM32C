@@ -6,7 +6,7 @@ if [ $? -eq 0 ]; then
     rm -rf *
     cmake ..
     cd ..
-    ln -s ${directory}/build/compile_commands.json
+    mv ${directory}/build/compile_commands.json ./
 else
     echo "error"
 fi

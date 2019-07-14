@@ -46,4 +46,41 @@ typedef char ForthCharacter;
 typedef size_t ForthIndex;
 typedef void (*ForthFuncPtr)(void);
 
+/*
+        Implementation types.
+*/
+typedef enum {
+  kCons = 0,
+  kFixNum = 2, /* immediate fixnum */
+  kBigNum = 3,
+  kSingleFloat,
+  kDoubleFloat,
+  kLongDoubleFloat,
+  kVector,
+  kPointer,
+  kTypeMask = 31,
+  kExecutable = 1 << 4,  /*  executable code   */
+  kFree = 1 << 5,        /*  TODO: free object for GC   */
+  kCompileOnly = 1 << 6, /* compile only */
+  kFlash = 1 << 7,       /* flash */
+} ForthType;
+
+typedef struct {
+  ForthType type;
+  ForthData data;
+} ForthObject;
+
+typedef ForthObject ForthCell;
+
+typedef struct {
+  ForthIndex size;
+  ForthObject *word;
+} ForthVector;
+
+typedef struct {
+  ForthObject car; /*  car  */
+  ForthObject cdr; /*  cdr  */
+} ForthCons;
+
+
 #endif /* GLOBAL_H */
