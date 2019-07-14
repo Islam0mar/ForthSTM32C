@@ -1,0 +1,14 @@
+%compile_commands.json
+# %c -std=c99
+# %cpp -std=c++14
+# %c -Wall -Wextra
+# Includes
+# -I/home/islam/e/embedded-projects/forthSTM32C/include
+# -I/home/islam/e/embedded-projects/forthSTM32C/include/hal
+# -I/home/islam/e/embedded-projects/forthSTM32C/Drivers/STM32F1xx_HAL_Driver/Inc
+# -I/home/islam/e/embedded-projects/forthSTM32C/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy
+# -I/home/islam/e/embedded-projects/forthSTM32C/Drivers/CMSIS/Device/ST/STM32F1xx/Include
+# -I/home/islam/e/embedded-projects/forthSTM32C/Drivers/CMSIS/Include
+# -I space_is_not_allowed
+
+  
