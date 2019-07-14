@@ -50,6 +50,7 @@ file(GLOB SOURCES "${PROJECT_PATH}/src/*.c"
 
 set(EXECUTABLE_OUTPUT_PATH "${PROJECT_PATH}/bin")
 set(CMAKE_BINARY_DIR "${PROJECT_PATH}/bin")
+set(CMAKE_COMPILE_COMMANDS_DIR "${PROJECT_PATH}/bin")
 #set_source_files_properties(main.s PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
 
 # linker
@@ -83,10 +84,7 @@ COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE} \nBuilding ${LIST_FILE}")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-
-
-execute_process(COMMAND cp ${PROJECT_SOURCE_DIR}/build/compile_commands.json ${PROJECT_SOURCE_DIR}/compile_commands.json)
-
+ 
 # upload
 # /* st-flash write forth.bin 0x08000000 */
 
