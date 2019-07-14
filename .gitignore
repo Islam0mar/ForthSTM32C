@@ -39,6 +39,5 @@ compile_commands.json
 /.ccls-cache
 .cproject
 .project
-/STM32Cube_FW_F1_V1.7.0
 *.zip
 
