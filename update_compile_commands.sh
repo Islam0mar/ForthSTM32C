@@ -6,8 +6,7 @@ if [ $? -eq 0 ]; then
     rm -rf *
     cmake ..
     cd ..
-    cp ${directory}/build/compile_commands.json ./
-    ccls -index=$PWD
+    ln -s ${directory}/build/compile_commands.json
 else
     echo "error"
 fi
