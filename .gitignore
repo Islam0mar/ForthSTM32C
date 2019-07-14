@@ -40,4 +40,6 @@ compile_commands.json
 .cproject
 .project
 *.zip
+/.vscode
+
 
