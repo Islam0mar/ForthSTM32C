@@ -2,11 +2,12 @@
  *   \file object.c
  *   \brief A Documented file.
  *
- *  Detailed description
+ *  Copyright (c) 2019 Islam Omar (io1131@fayoum.edu.eg)
  *
  */
 
 #include "forth/object.h"
+#include "forth/parse.h"
 
 static inline void *ForthAlloc(ForthIndex s) {
   static void *temp;
@@ -14,12 +15,12 @@ static inline void *ForthAlloc(ForthIndex s) {
   if (temp == NULL) {
     ForthError("ALLOCATION FAILED!", "ForthAlloc");
   }
+  return temp;
 }
 
 static inline void *ForthRealloc(ForthData d, ForthIndex s) {
-  static void *temp;
-  temp = realloc(d, s);
-  if (temp == NULL) {
+  d = realloc(d, s);
+  if (d == NULL) {
     ForthError("ALLOCATION FAILED!", "ForthRealloc");
   }
 }
@@ -69,19 +70,19 @@ ForthData ForthCreateData(ForthType t) {
 ForthObject ForthCreateEmptyObject(ForthType t) {
   static ForthObject obj;
   obj.type = t;
-  obj.data = CreateForthData(t);
+  obj.data = ForthCreateData(t);
   return obj;
 }
 
 ForthObject ForthCreateCons(ForthObject a, ForthObject b) {
-  static ForthObject obj = ForthCreateEmptyObject(kCons);
+  ForthObject obj = ForthCreateEmptyObject(kCons);
   FORTH_CONS_CAR(x.data) = a;
   FORTH_CONS_CDR(x.data) = b;
   return obj;
 }
 
 ForthObject ForthCreateNull() {
-  static ForthObject obj = ForthCreateEmptyObject(kPointer);
+  ForthObject obj = ForthCreateEmptyObject(kPointer);
   return obj;
 }
 
@@ -179,9 +180,9 @@ ForthObject ForthCreateObject(ForthData x, ForthType t) {
   return obj;
 }
 void ForthRemoveObject(ForthObject obj) {
-  switch (FORTH_TYPE_MASK(obj->t)) {
+  switch (FORTH_TYPE_MASK(obj.type)) {
     case kCons: {
-      ForthData d = obj->data;
+      ForthData d = obj.data;
       ForthRemoveObject(FORTH_CONS_CAR(d));
       ForthRemoveObject(FORTH_CONS_CDR(d));
       free(d);
@@ -191,27 +192,27 @@ void ForthRemoveObject(ForthObject obj) {
       break;
     }
     case kBigNum: {
-      free(obj->data);
+      free(obj.data);
       break;
     }
     case kSingleFloat: {
-      free(obj->data);
+      free(obj.data);
       break;
     }
     case kDoubleFloat: {
-      free(obj->data);
+      free(obj.data);
       break;
     }
     case kLongDoubleFloat: {
-      free(obj->data);
+      free(obj.data);
       break;
     }
     case kVector: {
-      free(obj->data);
+      free(obj.data);
       break;
     }
     case kPointer: {
-      free(obj->data);
+      free(obj.data);
       break;
     }
     default:
@@ -219,4 +220,12 @@ void ForthRemoveObject(ForthObject obj) {
       break;
   }
 }
+
+void ForthRemoveFreeObject(ForthObject obj) {
+  if (FORTH_FLAG_MASK(obj.type) == kFree) {
+    ForthRemoveObject(obj);
+  }
+}
+
+
 

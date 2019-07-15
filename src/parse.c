@@ -6,7 +6,12 @@
  *
  */
 
+#include <stdio.h>
+
+#include "forth/object.h"
 #include "forth/parse.h"
+#include "forth/tib.h"
+#include "hal/bsp.h"
 
 char *itoa(int val, int base) {
   static char buf[32] = {0};
@@ -52,7 +57,7 @@ ForthObject StrToForthObj(const char *s) {
   static double d;
   static long double ld;
   static long long ll;
-  t = kNull;
+  t = kPointer;
   for (; s[i] != '\0'; i++) {
   }
   if (i > 2) {
@@ -61,7 +66,7 @@ ForthObject StrToForthObj(const char *s) {
     } else if (toupper(s[i - 2]) == 'D' && s[i - 1] == '0') {
       t = kDoubleFloat;
     } else if (toupper(s[i - 2]) == 'L' && s[i - 1] == '0') {
-      t = kLongFloat;
+      t = kLongDoubleFloat;
     }
   }
   switch (t) {

@@ -2,9 +2,13 @@
  *   \file tib.h
  *   \brief A Documented file.
  *
- *  Detailed description
+ *  Copyright (c) 2019 Islam Omar (io1131@fayoum.edu.eg)
  *
  */
+#ifndef TIB_H
+#define TIB_H
+
+#include "global.h"
 
 /* Should be divisable by 2 (see HAL_UART_RxCpltCallback)*/
 #define TIB_SIZE 128U
@@ -20,5 +24,6 @@ inline char TIBReadChar();
 bool TIBEmpty();
 void TIBFlush();
 
+#endif /* TIB_H */
 
 

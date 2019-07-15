@@ -11,32 +11,25 @@
 uint8_t terminal_buffer[TIB_SIZE];
 uint8_t terminal_buffer_get_index;
 uint8_t terminal_buffer_insert_index;
-uint8_t pad[PAD_SIZE];
+char pad[PAD_SIZE];
 
-uint8_t TIBGetIndex(){
+uint8_t TIBGetIndex() {
   while (terminal_buffer_get_index == terminal_buffer_insert_index) {
     pause();
   }
   return terminal_buffer_get_index;
 }
-bool TIBEmpty(){
-  return (terminal_buffer_get_index == terminal_buffer_insert_index)
+bool TIBEmpty() {
+  return (terminal_buffer_get_index == terminal_buffer_insert_index);
 }
-uint8_t *TIBGetAddrs(){
-  return &terminal_buffer[TIBGetIndex()];
+uint8_t *TIBGetAddrs() { return &terminal_buffer[TIBGetIndex()]; }
+void TIBIncrementIndex() {
+  ++terminal_buffer_get_index;
+  terminal_buffer_get_index &= (TIB_SIZE - 1);
 }
-void TIBIncrementIndex(){
-  terminal_buffer_get_index = ++terminal_buffer_get_index & (TIB_SIZE - 1);
-}
-inline char TIBReadChar(){
-  uint8_t index = TIBGetValidIndex();
+inline char TIBReadChar() {
+  uint8_t index = TIBGetIndex();
   TIBIncrementIndex();
   return terminal_buffer[index];
 }
-void TIBFlush(){
-  terminal_buffer_get_index = terminal_buffer_insert_index;
-}
-
-
-
-
+void TIBFlush() { terminal_buffer_get_index = terminal_buffer_insert_index; }

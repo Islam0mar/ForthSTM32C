@@ -2,7 +2,7 @@
  *   \file global.h
  *   \brief A Documented file.
  *
- *  copyright MIT
+ *  Copyright (c) 2019 Islam Omar (io1131@fayoum.edu.eg)
  *
  */
 
@@ -51,8 +51,8 @@ typedef void (*ForthFuncPtr)(void);
 */
 typedef enum {
   kCons = 0,
-  kFixNum = 2, /* immediate fixnum */
-  kBigNum = 3,
+  kFixNum = 1, /* immediate fixnum */
+  kBigNum = 2,
   kSingleFloat,
   kDoubleFloat,
   kLongDoubleFloat,
@@ -81,6 +81,5 @@ typedef struct {
   ForthObject car; /*  car  */
   ForthObject cdr; /*  cdr  */
 } ForthCons;
-
 
 #endif /* GLOBAL_H */

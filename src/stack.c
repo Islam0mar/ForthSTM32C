@@ -2,7 +2,7 @@
  *   \file stack.c
  *   \brief A Documented file.
  *
- *  Detailed description
+ *  Copyright (c) 2019 Islam Omar (io1131@fayoum.edu.eg)
  *
  */
 
@@ -10,10 +10,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "forth/parse.h"
 #include "forth/stack.h"
 
-void Push(StackEntry, Stack *);
-void Pop(StackEntry *, Stack *);
+static Stack stack;
+#define STACK_PTR (&stack)
+StackEntry tos = {.type = kFixNum, .data = NULL};
+
+inline void PopTOS() {
+  ForthRemoveFreeObject(tos);
+  PopPSP(&tos);
+}
+inline void PushTOS() { PushPSP(tos); }
+inline void UpdateTOS(ForthData val, ForthType t) {
+  ForthRemoveFreeObject(tos);
+  tos = ForthCreateObject(val, t|kFree);
+}
+/* inline void UpdateTOS(ForthData val) { */
+/*   ForthRemoveFreeObject(tos); */
+/*   tos = ForthCreateObject(val, kFixNum); */
+/* } */
+
+inline StackEntry GetTOS() { return tos; }
+
 /* StackEmpty: returns non-zero if the stack is empty
    Pre: The stack exists and it has been initialized.
    Post: Return non-zero if the stack is empty; zero, otherwise.
@@ -32,15 +51,6 @@ static inline bool StackFull(Stack *ps) {
   // other possible code is:
   // return ps->top==MAXSTACK;
 }
-void CreateStack(Stack *);
-void StackTop(StackEntry *, Stack *);
-int StackSize(Stack *);
-void ClearStack(Stack *);
-void TraverseStack(Stack *, void (*)(StackEntry));
-
-static Stack stack;
-#define STACK_PTR (&stack)
-StackEntry tos = 0;
 
 void PopPSP(StackEntry *item_ptr) {
   if (!StackEmpty(STACK_PTR)) {
@@ -58,10 +68,9 @@ void PushPSP(StackEntry item) {
   }
 }
 
-/*********************************************************************************/
-/****************************** Array-based
- * implementation************************/
-/*********************************************************************************/
+/***********************************************************************/
+/********************* Array-based implementation **********************/
+/***********************************************************************/
 
 /* Push : push an item onto the stack
    Pre: The stack exists and it is not full.

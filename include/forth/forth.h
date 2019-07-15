@@ -2,7 +2,7 @@
  *   \file forth.h
  *   \brief A Documented file.
  *
- *  copyright MIT
+ *  Copyright (c) 2019 Islam Omar (io1131@fayoum.edu.eg)
  *
  */
 #ifndef FORTH_H

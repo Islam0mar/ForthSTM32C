@@ -1,11 +1,11 @@
-/*
- * @CreateTime: Jul 20, 2017 4:21 PM
- * @Author: Islam Omar
- * @Contact: io1131@fayoum.edu.eg
- * @Last Modified By: Islam Omar
- * @Last Modified Time: Jul 20, 2017 4:21 PM
- * @Description: Modify Here, Please
+/**
+ *   \file dictionary.h
+ *   \brief A Documented file.
+ *
+ *  Copyright (c) 2019 Islam Omar (io1131@fayoum.edu.eg)
+ *
  */
+
 #ifndef DICTIONARY_H
 #define DICTIONARY_H
 
@@ -18,8 +18,9 @@ typedef struct {
 
 typedef ElementType DictionaryEntry;
 
-typedef struct dictionary_node {
-  DictionaryNode next;
+/* FIXME: change name dictionarynode!! */
+typedef struct dictionarynode {
+  struct dictionarynode *next;
   DictionaryEntry entry;
 } DictionaryNode;
 
@@ -31,13 +32,16 @@ typedef struct {
 Dictionary *GetDictPtr();
 DictionaryNode *MakeDictionaryNode(DictionaryEntry item);
 bool AddToTail(DictionaryEntry item, Dictionary *pd);
-DictionaryNode *FindDictionaryItem(Dictionary *pd, char *name);
-bool DeleteDictionaryItem(Dictionary *pd, char *name);
+bool AddToHead(DictionaryEntry item, Dictionary *pd);
+DictionaryNode *FindDictionaryItem(char *name, Dictionary *pd);
+bool DeleteDictionaryItem(char *name, Dictionary *pd);
 bool DictionaryEmpty(Dictionary *pd);
 void CreateDictionary(Dictionary *pd);
 int DictionarySize(Dictionary *pd);
 void ClearDictionary(Dictionary *pd);
 bool AddToDictionary(char *name, ForthObject obj, Dictionary *pd);
-#define FORTH_DICT_ADD(name, obj) AddToDictionary(name, obj, GetDictPtr())
+static inline void AddDictionaryObject(char *name, ForthObject obj) {
+  AddToDictionary(name, obj, GetDictPtr());
+}
 
 #endif /* DICTIONARY_H */

@@ -1,10 +1,11 @@
 /**
- *   \file aux.h
+ *   \file parse.h
  *   \brief A Documented file.
  *
- *  Detailed description
+ *  Copyright (c) 2019 Islam Omar (io1131@fayoum.edu.eg)
  *
  */
+
 
 #ifndef PARSE_H
 #define PARSE_H

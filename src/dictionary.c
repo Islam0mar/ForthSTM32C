@@ -1,22 +1,19 @@
-/*
- * @CreateTime: Jul 20, 2017 4:21 PM
- * @Author: Islam Omar
- * @Contact: io1131@fayoum.edu.eg
- * @Last Modified By: Islam Omar
- * @Last Modified Time: Jul 20, 2017 4:21 PM
- * @Description: Modify Here, Please
+/**
+ *   \file dictionary.c
+ *   \brief A Documented file.
+ *
+ *  Copyright (c) 2019 Islam Omar (io1131@fayoum.edu.eg)
+ *
  */
 
+
 #include "forth/dictionary.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+#include "forth/global.h"
+#include "forth/object.h"
+#include "forth/parse.h"
 
 DictionaryNode *MakeDictionaryNode(DictionaryEntry item) {
-  DictionaryNode *p;
-
-  p = (DictionaryNode *)malloc(sizeof(DictionaryNode));
+  DictionaryNode *p = malloc(sizeof(DictionaryNode));
   if (p != NULL) {
     p->entry = item;
     p->next = NULL;
@@ -25,7 +22,7 @@ DictionaryNode *MakeDictionaryNode(DictionaryEntry item) {
 }
 
 bool AddToTail(DictionaryEntry item, Dictionary *pd) {
-  DictionaryNode *p = makeDictionaryNode(item);
+  DictionaryNode *p = MakeDictionaryNode(item);
   if (p == NULL) {
     return false;
   }
@@ -40,7 +37,7 @@ bool AddToTail(DictionaryEntry item, Dictionary *pd) {
 }
 
 bool AddToHead(DictionaryEntry item, Dictionary *pd) {
-  DictionaryNode *p = makeDictionaryNode(item);
+  DictionaryNode *p = MakeDictionaryNode(item);
   if (p == NULL) {
     return false;
   }
@@ -57,7 +54,7 @@ bool AddToHead(DictionaryEntry item, Dictionary *pd) {
 bool DictionaryEmpty(Dictionary *pd) { return pd->head == NULL; }
 
 Dictionary *GetDictPtr() {
-  static dict = {.head = NULL, .tail = NULL};
+  static Dictionary dict = {.head = NULL, .tail = NULL};
   return &dict;
 }
 
@@ -80,7 +77,7 @@ void ClearDictionary(Dictionary *pd) {
   pd->tail = pd->head;
 }
 
-DictionaryNode *FindDictionaryItem(Dictionary *pd, char *name) {
+DictionaryNode *FindDictionaryItem(char *name, Dictionary *pd) {
   DictionaryNode *p = pd->head;
   for (; p; p = p->next) {
     if (strcmp(name, p->entry.name) == 0) {
@@ -90,18 +87,18 @@ DictionaryNode *FindDictionaryItem(Dictionary *pd, char *name) {
   return NULL;
 }
 
-bool DeleteDictionaryItem(Dictionary *pd, char *name) {
+bool DeleteDictionaryItem(char *name, Dictionary *pd) {
   DictionaryNode *p = pd->head;
   DictionaryNode *prev_p = NULL;
   for (; p; p = p->next) {
     if (strcmp(name, p->entry.name) == 0) {
       if (FORTH_IS_FLASH(p->entry)) {
-        // TODO: remove flash
+        /* TODO: remove flash */
         return false;
       } else {
         prev_p->next = p->next;
         free(p->entry.name);
-        free(p->entry.ptr);
+        ForthRemoveObject(p->entry.object);
         free(p);
         return true;
       }
@@ -115,13 +112,15 @@ bool AddToDictionary(char *name, ForthObject obj, Dictionary *pd) {
   DictionaryNode *node = FindDictionaryItem(name, pd);
   if (node != NULL) {
     ForthWarning("Word overwritten", name);
-    node->object = obj;
+    node->entry.object = obj;
   } else {
     DictionaryEntry entry = {.object = obj};
     const size_t str_len = strlen(name) + 1;
     entry.name = malloc(sizeof(char) * str_len);
-    if (entry.name == NULL) return false;
+    if (entry.name == NULL) {
+      return false;
+    }
     strncpy(entry.name, name, str_len);
-    return addToHead(entry, pd);
+    return AddToHead(entry, pd);
   }
 }

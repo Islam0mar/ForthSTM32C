@@ -1,3 +1,11 @@
+/**
+ *   \file object.h
+ *   \brief A Documented file.
+ *
+ *  Copyright (c) 2019 Islam Omar (io1131@fayoum.edu.eg)
+ *
+ */
+
 #ifndef OBJECT_H
 #define OBJECT_H
 
@@ -27,6 +35,7 @@ ForthObject ForthCreateVector(ForthObject x);
 void ForthAddToVector(ForthObject x, ForthVector *v);
 ForthObject ForthCreateObject(ForthData x, ForthType t);
 void ForthRemoveObject(ForthObject obj);
+void ForthRemoveFreeObject(ForthObject obj);
 
 #define FORTH_CONS_CAR(x) (((ForthCons *)x)->car)
 #define FORTH_CONS_CDR(x) (((ForthCons *)x)->cdr)

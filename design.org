@@ -5,14 +5,40 @@
 #+OPTIONS: H:4
 
 * DICTIONARY: 
-|--------------------------------------------|
-|                     NAME                   |
-|------------------+-------------------+-----|
-| First Word Index | Second Word Index | ... |                   |                   |     |
-|--------------------------------------------|
+|-------------------------------+-------------------+-----+---+---+---|
+| NAME                          |                   |     |   |   |   |
+|-------------------------------+-------------------+-----+---+---+---|
+| First Word Index              | Second Word Index | ... |   |   |   |
+| sadasddddddddddddddddddasdasd |                   |     |   |   |   |
+| -                             |                   |     |   |   |   |
+|                               |                   |     |   |   |   |
+|-------------------------------+-------------------+-----+---+---+---|
 
 
 - Containing Words
 
+* TODO-LIST                                                            :TODO:
+** 
+** DONE remove object based on free flag
+   CLOSED: [2019-07-15 Mon 09:08]
+** DONE add updateTOS fun
+   CLOSED: [2019-07-15 Mon 09:17]
+** DONE delete free objects after updateTOS, popTOS and pushTOS
+   CLOSED: [2019-07-15 Mon 09:17]
+** TODO redefine words
+** TODO table
+|-------------+------+-----|
+| sadasdasdas | sad  | asd |
+|-------------+------+-----|
+|-------------+------+-----|
+| asdasd      |      |     |
+|-------------+------+-----|
+| sadasd      | aasd |     |
+|             |      |     |
+|             |      |     |
+|             |      |     |
+|             |      |     |
+|             |      |     |
+|             |      |     |
 
 

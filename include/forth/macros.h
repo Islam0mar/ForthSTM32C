@@ -2,7 +2,7 @@
 #define MACROS_H
 
 #include "dictionary.h"
-// gcc -E words.h -o o.c
+/* gcc -E words.h -o o.c */
 #define VERSION_MAJOR 1
 #define VERSION_MINOR 0
 #define VERSION_PATCH 0
@@ -97,33 +97,37 @@
 #endif /* MACROS_H */
 
 // ================================================================== //
-// FORTH_DEFINE_PRIMITIVES
+// FORTH_DEFINE_IMPLEMENTATIONS
 // ================================================================== //
-#ifdef FORTH_DEFINE_PRIMITIVES
+#ifdef FORTH_DEFINE_IMPLEMENTATIONS
 
-// implement the basic definition primitive
-#define DEFCODE(next, name_str, flags, func, _comnt, BLOCK) \
-  void func() BLOCK;                                        \
-  const DictionaryNode func##_node = {                      \
-      .next = next##_node,                                  \
-      .entry = {.data = (ForthData)&func,                   \
-                .type = (flags | kPointer | kFlash | kExecutable)}}
+/* implement the basic definition primitive */
+#define FIRSTDEFCODE(name_str, flags, func, _comnt, BLOCK)                     \
+  void func() BLOCK;                                                           \
+  const DictionaryNode func##_node = {                                         \
+      .next = NULL,                                                            \
+      .entry = {.object = {.data = (ForthData)&func,                           \
+                           .type = (flags | kPointer | kFlash | kExecutable)}, \
+                .name = name_str}}
+
+#define DEFCODE(next, name_str, flags, func, _comnt, BLOCK)                    \
+  void func() BLOCK;                                                           \
+  const DictionaryNode func##_node = {                                         \
+      .next = &##next##_node,                                                  \
+      .entry = {.object = {.data = (ForthData)&func,                           \
+                           .type = (flags | kPointer | kFlash | kExecutable)}, \
+                .name = name_str}}
 
 #define DEFWORD(next, name_str, flags, func, _comnt, words...)                \
   const ForthObject obj[COUNT_VARARGS(words)] = {FUN_TO_FORTH_OBJECT(words)}; \
   const ForthVector v = {.size = COUNT_VARARGS(words), .word = obj};          \
   const DictionaryNode func##_node = {                                        \
-      .next = next##_node,                                                    \
-      .entry = {.data = (ForthData)&v,                                        \
-                .type = (flags | kVector | kFlash | kExecutable)}}
+      .next = &##next##_node,                                                 \
+      entry = {.object = {.data = (ForthData)&v,                              \
+                          .type = (flags | kVector | kFlash | kExecutable)},  \
+               .name = name_str}}
 
-// #define defvar(next, name_str, flags, func,_comnt, words...)
-// //   FuncPtr functions[COUNT_VARARGS(words)] = {words};
-// //   const DictionaryEntry func ## _entry = {.flags = flags, .length =
-// COUNT_VARARGS(words), .ptr = (void*)functions};
-// //   const DictionaryNode func ## _node = {.next = next, .entry = entry}
-
-#endif  // FORTH_DEFINE_PRIMITIVES
+#endif /* FORTH_DEFINE_IMPLEMENTATIONS */
 
 // ================================================================== //
 // FORTH_DEFINE_HEADERS
@@ -137,4 +141,6 @@
 #define DEFWORD(next, name_str, flags, func, _comnt, words...) \
   extern const DictionaryNode func##_node
 
-#endif  // FORTH_DEFINE_HEADERS
+#endif /* FORTH_DEFINE_HEADERS */
+
+

@@ -1,14 +1,3 @@
-#include <math.h>
-#include <setjmp.h> /* jmp_buf, setjmp, longjmp */
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "global.h"
-#define FORTH_DEFINE_PRIMITIVES
-#include "macros.h"
-
 /*
         QUIT AND INTERPRET
    ----------------------------------------------------------------------
@@ -30,16 +19,16 @@ FIRSTDEFCODE("QUIT", 0, quit,
 
 DEFCODE(quit, "KEY", 0, key, "( -- c ) Receive one character", {
   PushTOS();
-  UpdateTOS(TIBReadChar());
+  UpdateTOS(TIBReadChar(), kFixNum);
 });
 
-DEFCODE(NULL, "KEY?", 0, is_key, "( -- 0|1 ) Receive one character", {
+DEFCODE(key, "KEY?", 0, is_key, "( -- 0|1 ) Receive one character", {
   PushTOS();
-  tos = (TIBEmpty()) ? 0 : 1;
+  UpdateTOS((TIBEmpty()) ? 0 : 1, kFixNum);
 });
 
-DEFCODE(NULL, "WORD", 0, word, "( -- addr length ) reads next word from buffer",
-        {
+DEFCODE(is_key, "WORD", 0, word,
+        "( -- addr length ) reads next word from buffer", {
           static uint8_t i;
           for (i = 0;;) {
             pad[i] = TIBReadChar();
@@ -73,34 +62,35 @@ DEFCODE(NULL, "WORD", 0, word, "( -- addr length ) reads next word from buffer",
             }
           }
           PushTOS();
-          PushPSP(pad);
-          tos = i;
+          UpdateTOS(pad, kPointer);
+          PushTOS();
+          UpdateTOS(i, kFixNum);
         });
 
-DEFCODE(NULL, "(FIND)", 0, paren_find, "( addr length -- dictionary_address )",
+DEFCODE(word, "(FIND)", 0, paren_find, "( addr length -- dictionary_address )",
         {
           PopTOS();
-          tos = findDictionaryItem(GetDictPtr(), tos);
+          UpdateTOS(FindDictionaryItem(GetTOS().data, GetDictPtr()), kPointer);
         });
 
-DEFCODE(NULL, ">CFA", 0, tcfa, "( dictionary_address -- executable_address )",
-        { tos = tos->ptr; });
+DEFCODE(paren_find, ">CFA", 0, tcfa, "( dictionary_address -- executable_address )",
+        { ; });
 
-DEFCODE(NULL, ">DFA", 0, tdfa, "( dictionary_address -- data_field_address )",
-        { os = tos->ptr; });
+DEFCODE(tcfa, ">DFA", 0, tdfa, "( dictionary_address -- data_field_address )",
+        { ; });
 
 // @ LIT is used to compile literals in forth word.
 // @ When LIT is executed it pushes the literal (which is the next codeword)
 // @ into the stack and skips it (since the literal is not executable).
-DEFCODE(NULL, "LIT", 0, lit, "compile literals in forth word",
+DEFCODE(tdfa, "LIT", 0, lit, "compile literals in forth word",
         {
   word();
   paren_find();
   // word not found in dict
-  if (tos == NULL) {
-    if (EXECUTE_STATE) {  // exec
+  if (GetTOS() == NULL) {
+    if (FORTH_IS_EXE_STATE) {  // exec
       pushTOS();
-      tos = StrToInt();
+      GetTOS() = StrToInt();
     } else {  // compile mode
     }
   }
@@ -108,7 +98,7 @@ DEFCODE(NULL, "LIT", 0, lit, "compile literals in forth word",
   // 	pushTOS
   //     ldr tos, [fpc], #4
   // NEXT
-  DEFCODE(NULL, ",", 0, comma,
+  DEFCODE(lit, ",", 0, comma,
           "( n -- ) writes the top element from the stack at DP", {
             if (FORTH_IS_EXE_STATE) {
             } else {
@@ -135,7 +125,6 @@ DEFCODE(NULL, "LIT", 0, lit, "compile literals in forth word",
         tos = StrToForthObj();
       } else {  // compile mode
         tos = StrToForthObj();
-        ;
         comma();
         tos = StrToInt();
         comma();
