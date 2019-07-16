@@ -17,6 +17,11 @@ set(CMAKE_OBJDUMP          arm-none-eabi-objdump)
 set(CMAKE_ASM_LINK_EXECUTABLE "<CMAKE_LINKER> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 # project
 project(forth ASM C CXX)
+set(CMAKE_ASM_COMPILER     arm-none-eabi-as)
+set(CMAKE_LINKER           arm-none-eabi-ld)
+set(CMAKE_OBJCOPY     	   arm-none-eabi-objcopy)
+set(CMAKE_OBJDUMP          arm-none-eabi-objdump)
+set(CMAKE_SIZE             arm-none-eabi-size)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
@@ -33,11 +38,10 @@ include_directories(include include/hal
 # -IMiddlewares/ST/STM32_USB_Device_Library/Core/Inc \
 # -IMiddlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
 
-# flags
-set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103C8T6.ld)
 # The file(GLOB...) allows for wildcard additions:
 file(GLOB SOURCES "${PROJECT_PATH}/src/*.c"
   "${PROJECT_PATH}/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c"
+  "${PROJECT_PATH}/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c"
   "${PROJECT_PATH}/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c"
   "${PROJECT_PATH}/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c"
   "${PROJECT_PATH}/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c"
@@ -54,10 +58,11 @@ set(CMAKE_COMPILE_COMMANDS_DIR "${PROJECT_PATH}/bin")
 #set_source_files_properties(main.s PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
 
 # linker
+set(LINKER_SCRIPT ${PROJECT_SOURCE_DIR}/STM32F103C8T6.ld)
 #set(CMAKE_EXE_LINKER_FLAGS "-v -T ${LINKER_SCRIPT}")
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -mthumb -mcpu=cortex-m3 --specs=nosys.specs")
+set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} -Wl,--gc-sections -mthumb -mcpu=cortex-m3 --specs=nosys.specs")
 
-set(CMAKE_C_FLAGS "-mthumb -save-temps -mcpu=cortex-m3 -fno-builtin -DUSE_HAL_DRIVER -DSTM32F103xB -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections")
+set(CMAKE_C_FLAGS "-ggdb -mthumb -save-temps -mcpu=cortex-m3 -fno-builtin -DUSE_HAL_DRIVER -DSTM32F103xB -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections")
 set(CMAKE_CXX_FLAGS "-mthumb -mcpu=cortex-m3 -fno-builtin -Wall std=c++11 -ffreestanding  -fdata-sections -ffunction-sections")
 set(CMAKE_ASM_FLAGS "-mimplicit-it=always -gdb3 -mthumb -mcpu=cortex-m3")
 # SYS_OBJECTS = #Long list of object files
@@ -66,15 +71,15 @@ set(CMAKE_ASM_FLAGS "-mimplicit-it=always -gdb3 -mthumb -mcpu=cortex-m3")
 # LIBRARIES = -lmbed 
 set(STARTUP src/startup_stm32f103_gnu.c)
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${STARTUP} ${LINKER_SCRIPT} )
-
 set(ASM_FILE ${PROJECT_SOURCE_DIR}/bin/${PROJECT_NAME}.s)
 set(LIST_FILE ${PROJECT_SOURCE_DIR}/bin/${PROJECT_NAME}.list)
 set(HEX_FILE ${PROJECT_SOURCE_DIR}/bin/${PROJECT_NAME}.hex)
 set(BIN_FILE ${PROJECT_SOURCE_DIR}/bin/${PROJECT_NAME}.bin)
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-COMMAND "${CMAKE_OBJDUMP}" -D $<TARGET_FILE:${PROJECT_NAME}.elf> >${LIST_FILE}
-COMMAND "${CMAKE_OBJCOPY}" -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
-COMMAND "${CMAKE_OBJCOPY}" -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
+COMMAND ${CMAKE_OBJDUMP} -D $<TARGET_FILE:${PROJECT_NAME}.elf> >${LIST_FILE}
+COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
+COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
+COMMAND ${CMAKE_SIZE} -A -x -t  $<TARGET_FILE:${PROJECT_NAME}.elf>
 # COMMAND make ARGS ${PROJECT_PATH}/src/main.c.s
 # COMMAND make main.c.s
 # COMMAND ${CMAKE_C_COMPILER} -S  ${PROJECT_PATH}/src/main.c -fverbose-asm -Ofast -mthumb -mcpu=cortex-m3 -fno-builtin -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections -o ${ASM_FILE} -I${PROJECT_PATH}/include

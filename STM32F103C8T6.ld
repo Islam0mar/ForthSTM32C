@@ -30,10 +30,10 @@ MEMORY
     RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 20K
 }
 /* The size of the stack used by the application. NOTE: you need to adjust  */
-STACK_SIZE = 512;
+STACK_SIZE = 1024;
 
 /* The size of the heap used by the application. NOTE: you need to adjust   */
-HEAP_SIZE = 0;
+HEAP_SIZE = 2048;
 
 SECTIONS
 {
@@ -76,6 +76,13 @@ SECTIONS
         PROVIDE_HIDDEN (__fini_array_end = .);
     } >FLASH
 
+  /* .fill : { */
+	/* 	_code = .; */
+  /*   	FILL(0xFFFF); */
+  /*   	. = ORIGIN(FLASH) + LENGTH(FLASH) - 1; */
+  /*   	BYTE(0xFF) */
+  /* 	} >FLASH */
+  
      _etext = .;            /* global symbols at end of code */
 
     .stack : {
@@ -116,11 +123,11 @@ SECTIONS
         __heap_end__ = .;
     } >RAM
 
-  /*   /\* Remove information from the standard libraries  */
-  /*   /DISCARD/ : { */
-  /*       libc.a ( * ) */
-  /*       libm.a ( * ) */
-  /*       libgcc.a ( * ) */
-  /*   } */
+    /* Remove information from the standard libraries*/
+    /DISCARD/ : {
+        libc.a ( * )
+        libm.a ( * )
+        libgcc.a ( * )
+    }
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
