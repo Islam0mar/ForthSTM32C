@@ -23,6 +23,7 @@ static inline void *ForthRealloc(ForthData d, ForthIndex s) {
   if (d == NULL) {
     ForthError("ALLOCATION FAILED!", "ForthRealloc");
   }
+  return d;
 }
 
 ForthData ForthCreateData(ForthType t) {
@@ -76,8 +77,8 @@ ForthObject ForthCreateEmptyObject(ForthType t) {
 
 ForthObject ForthCreateCons(ForthObject a, ForthObject b) {
   ForthObject obj = ForthCreateEmptyObject(kCons);
-  FORTH_CONS_CAR(x.data) = a;
-  FORTH_CONS_CDR(x.data) = b;
+  FORTH_CONS_CAR(obj.data) = a;
+  FORTH_CONS_CDR(obj.data) = b;
   return obj;
 }
 
@@ -94,25 +95,25 @@ ForthObject ForthCreateFixNum(ForthFixNum x) {
 
 ForthObject ForthCreateBigNum(ForthBigNum x) {
   ForthObject obj = ForthCreateEmptyObject(kBigNum);
-  *obj.data = x;
+  *((ForthBigNum *)obj.data) = x;
   return obj;
 }
 
 ForthObject ForthCreateSingleFloat(float x) {
   ForthObject obj = ForthCreateEmptyObject(kSingleFloat);
-  *obj.data = x;
+  *((float *)obj.data) = x;
   return obj;
 }
 
 ForthObject ForthCreateDoubleFloat(double x) {
   ForthObject obj = ForthCreateEmptyObject(kDoubleFloat);
-  *obj.data = x;
+  *((double *)obj.data) = x;
   return obj;
 }
 
 ForthObject ForthCreateLongDoubleFloat(long double x) {
   ForthObject obj = ForthCreateEmptyObject(kLongDoubleFloat);
-  *obj.data = x;
+  *((long double *)obj.data) = x;
   return obj;
 }
 
@@ -132,16 +133,16 @@ ForthObject ForthCreateVector(ForthObject x) {
 
 void ForthAddToVector(ForthObject x, ForthVector *v) {
   v->size++;
-  v->word = ForthRealloc(v->word, v->size * sizeof(x));
+  v->word = ForthRealloc(v->word, v->size * sizeof(ForthObject));
   v->word[v->size - 1] = x;
 }
 
 ForthObject ForthCreateObject(ForthData x, ForthType t) {
-  static ForthObject obj = NULL;
+  static ForthObject obj;
   switch (FORTH_TYPE_MASK(t)) {
     case kCons: {
       /* TODO: Unused!! */
-      obj = CONS((ForthObject)x, ForthCreateNull());
+      obj = CONS(*(ForthObject *)x, ForthCreateNull());
       break;
     }
     case kFixNum: {
@@ -165,11 +166,11 @@ ForthObject ForthCreateObject(ForthData x, ForthType t) {
       break;
     }
     case kVector: {
-      obj = ForthCreateVector((ForthObject)x);
+      obj = ForthCreateVector(*(ForthObject *)x);
       break;
     }
     case kPointer: {
-      obj.t = t;
+      obj.type = t;
       obj.data = x;
       break;
     }
@@ -226,6 +227,3 @@ void ForthRemoveFreeObject(ForthObject obj) {
     ForthRemoveObject(obj);
   }
 }
-
-
-

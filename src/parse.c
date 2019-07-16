@@ -11,6 +11,7 @@
 #include "forth/object.h"
 #include "forth/parse.h"
 #include "forth/tib.h"
+#include "forth/words.h"
 #include "hal/bsp.h"
 
 char *itoa(int val, int base) {
@@ -47,6 +48,7 @@ void ForthWarning(const char *err_message, const char *word) {
   SendMsg("Executing continues...");
   quit();
 }
+inline void ForthPrint(char *s) { SendMsg(s); }
 
 ForthObject StrToForthObj(const char *s) {
   static char *end;

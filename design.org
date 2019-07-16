@@ -25,6 +25,8 @@
    CLOSED: [2019-07-15 Mon 09:17]
 ** DONE delete free objects after updateTOS, popTOS and pushTOS
    CLOSED: [2019-07-15 Mon 09:17]
+** TODO interpreter pseudo-code
+** TODO choose unneeded forth words
 ** TODO redefine words
 ** TODO table
 |-------------+------+-----|

@@ -42,11 +42,11 @@ void ForthRemoveFreeObject(ForthObject obj);
 #define CONS(a, d) ForthCreateCons((a), (d))
 #define ACONS(a, b, c) ForthCreateCons(ForthCreateCons((a), (b)), (c))
 #define FORTH_FIXNUM(x) ((ForthFixNum)(x))
-#define FORTH_BIGNUM(x) ((ForthBigNum)(*x))
-#define FORTH_SFLOAT(x) ((float)(*x))
-#define FORTH_DFLOAT(x) ((double)(*x))
-#define FORTH_LDFLOAT(x) ((long double)(*x))
-#define FORTH_CFUN(x) ((ForthFuncPtr)(*x))
+#define FORTH_BIGNUM(x) (*(ForthBigNum*)x)
+#define FORTH_SFLOAT(x) (*(float *)x)
+#define FORTH_DFLOAT(x) (*(double*)x)
+#define FORTH_LDFLOAT(x) (*(long double*)x)
+#define FORTH_CFUN(x) (*(ForthFuncPtr *)x)
 
 static inline ForthObject ForthCar(ForthObject x) {
   if (x.data == NULL) return x;
@@ -56,35 +56,8 @@ static inline ForthObject ForthCar(ForthObject x) {
 
 static inline ForthObject ForthCdr(ForthObject x) {
   if (x.data == NULL) return x;
-  x = FORTH_CONS_CDR(x);
+  x = FORTH_CONS_CDR(x.data);
   return x;
-}
-
-void execute() {
-  ForthType t = tos.type;
-  if (FORTH_IS_IMMEDIATE(t)) {
-    tos = tos.data;
-  } else {
-    switch (FORTH_TYPE_MASK(t)) {
-      case kCFun: {
-        (*(ForthFuncPtr)(tos.data))();
-        break;
-      }
-      case kByteCode: {
-        static ForthVector *x;
-        static uint8_t i;
-        x = (ForthVector *)(tos.data);
-        PopTOS();
-        for (i = 0; i < x->size; i++) {
-          execute(x->word);
-        }
-        break;
-      }
-      default:
-        ForthError("CANNOT EXECUTE WORD", itoa(tos.data, 16));
-        break;
-    }
-  }
 }
 
 #endif /* OBJECT_H */

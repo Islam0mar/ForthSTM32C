@@ -23,10 +23,11 @@ typedef struct stack {
 void PopPSP(StackEntry *);
 void PushPSP(StackEntry);
 
-inline void PopTOS();
-inline void PushTOS();
-inline void UpdateTOS(ForthData val, ForthType t);
-inline StackEntry GetTOS();
+void PopTOS();
+void PushTOS();
+void UpdateTOSWithValueType(ForthData val, ForthType t);
+void UpdateTOSWithObject(StackEntry);
+StackEntry *GetTOSPtr();
 
 void Push(StackEntry, Stack *);
 void Pop(StackEntry *, Stack *);
@@ -37,5 +38,5 @@ void StackTop(StackEntry *, Stack *);
 int StackSize(Stack *);
 void ClearStack(Stack *);
 void TraverseStack(Stack *, void (*)(StackEntry));
-
+void PrintStack();
 #endif /* STACK_H */

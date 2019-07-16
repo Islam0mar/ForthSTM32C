@@ -20,7 +20,7 @@ extern char pad[PAD_SIZE];
 uint8_t TIBGetIndex();
 uint8_t *TIBGetAddrs();
 void TIBIncrementIndex();
-inline char TIBReadChar();
+char TIBReadChar();
 bool TIBEmpty();
 void TIBFlush();
 

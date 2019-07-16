@@ -17,21 +17,25 @@ static Stack stack;
 #define STACK_PTR (&stack)
 StackEntry tos = {.type = kFixNum, .data = NULL};
 
-inline void PopTOS() {
+void PopTOS() {
   ForthRemoveFreeObject(tos);
   PopPSP(&tos);
 }
-inline void PushTOS() { PushPSP(tos); }
-inline void UpdateTOS(ForthData val, ForthType t) {
+void PushTOS() { PushPSP(tos); }
+void UpdateTOSWithValueType(ForthData val, ForthType t) {
   ForthRemoveFreeObject(tos);
-  tos = ForthCreateObject(val, t|kFree);
+  tos = ForthCreateObject(val, t | kFree);
+}
+void UpdateTOSWithObject(StackEntry s) {
+  ForthRemoveFreeObject(tos);
+  tos = s;
 }
 /* inline void UpdateTOS(ForthData val) { */
 /*   ForthRemoveFreeObject(tos); */
 /*   tos = ForthCreateObject(val, kFixNum); */
 /* } */
 
-inline StackEntry GetTOS() { return tos; }
+StackEntry *GetTOSPtr() { return &tos; }
 
 /* StackEmpty: returns non-zero if the stack is empty
    Pre: The stack exists and it has been initialized.
@@ -117,3 +121,50 @@ Post:  Visit Each element in the stack from the top to the bottom.
 void TraverseStack(Stack *ps, void (*pvisit)(StackEntry)) {
   for (int i = ps->top; i > 0; i--) (*pvisit)(ps->entry[i - 1]);
 } /* void TraverseStack */
+
+/* helper fun for print */
+void PrintObject(StackEntry item) {
+  /* char * data; */
+  /* switch (FORTH_TYPE_MASK(item.type)) { */
+  /*   case kCons: { */
+  /*     data = strtol(); */
+  /*     break; */
+  /*   } */
+  /*   case kFixNum: { */
+  /*     data = -1; */
+  /*     break; */
+  /*   } */
+  /*   case kBigNum: { */
+  /*     data = ForthAlloc(sizeof(ForthBigNum)); */
+  /*     break; */
+  /*   } */
+  /*   case kSingleFloat: { */
+  /*     data = ForthAlloc(sizeof(float)); */
+  /*     break; */
+  /*   } */
+  /*   case kDoubleFloat: { */
+  /*     data = ForthAlloc(sizeof(double)); */
+  /*     break; */
+  /*   } */
+  /*   case kLongDoubleFloat: { */
+  /*     data = ForthAlloc(sizeof(long double)); */
+  /*     break; */
+  /*   } */
+  /*   case kVector: { */
+  /*     data = ForthAlloc(sizeof(ForthVector)); */
+  /*     break; */
+  /*   } */
+  /*   case kPointer: { */
+  /*     data = NULL; */
+  /*     break; */
+  /*   } */
+  /*   default: */
+  /*     ForthError("UNKNOWN TYPE", "ForthCreateData"); */
+  /*     break; */
+  /* } */
+  ForthPrint(itoa(item.data, 16));
+}
+/* print stack */
+void PrintStack() {
+  TraverseStack(STACK_PTR, TraverseStack);
+}

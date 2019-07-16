@@ -27,7 +27,7 @@ void TIBIncrementIndex() {
   ++terminal_buffer_get_index;
   terminal_buffer_get_index &= (TIB_SIZE - 1);
 }
-inline char TIBReadChar() {
+char TIBReadChar() {
   uint8_t index = TIBGetIndex();
   TIBIncrementIndex();
   return terminal_buffer[index];

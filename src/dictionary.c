@@ -6,7 +6,6 @@
  *
  */
 
-
 #include "forth/dictionary.h"
 #include "forth/global.h"
 #include "forth/object.h"
@@ -53,7 +52,7 @@ bool AddToHead(DictionaryEntry item, Dictionary *pd) {
 
 bool DictionaryEmpty(Dictionary *pd) { return pd->head == NULL; }
 
-Dictionary *GetDictPtr() {
+Dictionary *GetDictionaryPointer() {
   static Dictionary dict = {.head = NULL, .tail = NULL};
   return &dict;
 }
@@ -86,13 +85,17 @@ DictionaryNode *FindDictionaryItem(char *name, Dictionary *pd) {
   }
   return NULL;
 }
+ForthObject GetDictionaryEntryObject(DictionaryNode *p) {
+  return p->entry.object;
+}
+char *GetDictionaryEntryName(DictionaryNode *p) { return p->entry.name; }
 
 bool DeleteDictionaryItem(char *name, Dictionary *pd) {
   DictionaryNode *p = pd->head;
   DictionaryNode *prev_p = NULL;
   for (; p; p = p->next) {
     if (strcmp(name, p->entry.name) == 0) {
-      if (FORTH_IS_FLASH(p->entry)) {
+      if (FORTH_IS_FLASH(p->entry.object)) {
         /* TODO: remove flash */
         return false;
       } else {
@@ -121,6 +124,7 @@ bool AddToDictionary(char *name, ForthObject obj, Dictionary *pd) {
       return false;
     }
     strncpy(entry.name, name, str_len);
+    /* FIXME: memleak */
     return AddToHead(entry, pd);
   }
 }

@@ -7,6 +7,7 @@
  */
 
 #include "hal/bsp.h"
+#include "forth/tib.h"
 #include "stm32f1xx_hal.h"
 
 /*******************************************************************************
@@ -24,7 +25,7 @@ uint8_t terminal_buffer[TIB_SIZE];
 uint8_t terminal_buffer_get_index = 0;
 uint8_t terminal_buffer_insert_index = 0;
 
-void init() {
+void Init() {
   /* Reset of all peripherals, Initializes the Flash interface and the Systick.
    */
   HAL_Init();

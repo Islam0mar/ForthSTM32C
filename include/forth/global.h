@@ -57,8 +57,9 @@ typedef enum {
   kDoubleFloat,
   kLongDoubleFloat,
   kVector,
-  kPointer,
-  kTypeMask = 31,
+  kPointer = 7,
+  kTypeMask = kPointer,
+  kImmediate = 1 << 3,   /* immediate word */
   kExecutable = 1 << 4,  /*  executable code   */
   kFree = 1 << 5,        /*  TODO: free object for GC   */
   kCompileOnly = 1 << 6, /* compile only */

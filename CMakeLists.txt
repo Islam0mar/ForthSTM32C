@@ -75,7 +75,6 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
 COMMAND "${CMAKE_OBJDUMP}" -D $<TARGET_FILE:${PROJECT_NAME}.elf> >${LIST_FILE}
 COMMAND "${CMAKE_OBJCOPY}" -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
 COMMAND "${CMAKE_OBJCOPY}" -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
-COMMAND ln -s ${PROJECT_SOURCE_DIR}/build/compile_commands.json ${PROJECT_SOURCE_DIR}/compile_commands.json
 # COMMAND make ARGS ${PROJECT_PATH}/src/main.c.s
 # COMMAND make main.c.s
 # COMMAND ${CMAKE_C_COMPILER} -S  ${PROJECT_PATH}/src/main.c -fverbose-asm -Ofast -mthumb -mcpu=cortex-m3 -fno-builtin -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections -o ${ASM_FILE} -I${PROJECT_PATH}/include

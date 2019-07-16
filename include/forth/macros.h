@@ -1,3 +1,11 @@
+/**
+ *   \file macros.h
+ *   \brief A Documented file.
+ *
+ *  Copyright (c) 2019 Islam Omar (io1131@fayoum.edu.eg)
+ *
+ */
+
 #ifndef MACROS_H
 #define MACROS_H
 
@@ -93,6 +101,7 @@
   { __VA_ARGS__ }
 #define FUN_TO_FORTH_OBJECT(...) \
   EVAL(MAKE_INITIALIZER TRANSFORM(APPEND_NODE_STR, (__VA_ARGS__)))
+#define ADDRS(x) &x
 
 #endif /* MACROS_H */
 
@@ -110,19 +119,19 @@
                            .type = (flags | kPointer | kFlash | kExecutable)}, \
                 .name = name_str}}
 
-#define DEFCODE(next, name_str, flags, func, _comnt, BLOCK)                    \
+#define DEFCODE(previous_word, name_str, flags, func, _comnt, BLOCK)           \
   void func() BLOCK;                                                           \
   const DictionaryNode func##_node = {                                         \
-      .next = &##next##_node,                                                  \
+      .next = ADDRS(previous_word##_node),                                     \
       .entry = {.object = {.data = (ForthData)&func,                           \
                            .type = (flags | kPointer | kFlash | kExecutable)}, \
                 .name = name_str}}
 
-#define DEFWORD(next, name_str, flags, func, _comnt, words...)                \
+#define DEFWORD(previous_word, name_str, flags, func, _comnt, words...)       \
   const ForthObject obj[COUNT_VARARGS(words)] = {FUN_TO_FORTH_OBJECT(words)}; \
   const ForthVector v = {.size = COUNT_VARARGS(words), .word = obj};          \
   const DictionaryNode func##_node = {                                        \
-      .next = &##next##_node,                                                 \
+      .next = ADDRS(previous_word##_node),                                    \
       entry = {.object = {.data = (ForthData)&v,                              \
                           .type = (flags | kVector | kFlash | kExecutable)},  \
                .name = name_str}}
@@ -134,6 +143,10 @@
 // ================================================================== //
 #ifdef FORTH_DEFINE_HEADERS
 
+#define FIRSTDEFCODE(name_str, flags, func, _comnt, BLOCK) \
+  void func();                                             \
+  extern const DictionaryNode func##_node
+
 #define DEFCODE(next, name_str, flags, func, _comnt, BLOCK) \
   void func();                                              \
   extern const DictionaryNode func##_node
@@ -142,5 +155,3 @@
   extern const DictionaryNode func##_node
 
 #endif /* FORTH_DEFINE_HEADERS */
-
-

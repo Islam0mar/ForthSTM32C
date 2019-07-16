@@ -29,7 +29,7 @@ typedef struct {
   DictionaryNode *tail;
 } Dictionary;
 
-Dictionary *GetDictPtr();
+Dictionary *GetDictionaryPointer();
 DictionaryNode *MakeDictionaryNode(DictionaryEntry item);
 bool AddToTail(DictionaryEntry item, Dictionary *pd);
 bool AddToHead(DictionaryEntry item, Dictionary *pd);
@@ -40,8 +40,10 @@ void CreateDictionary(Dictionary *pd);
 int DictionarySize(Dictionary *pd);
 void ClearDictionary(Dictionary *pd);
 bool AddToDictionary(char *name, ForthObject obj, Dictionary *pd);
+ForthObject GetDictionaryEntryObject(DictionaryNode *p);
+char *GetDictionaryEntryName(DictionaryNode *p);
 static inline void AddDictionaryObject(char *name, ForthObject obj) {
-  AddToDictionary(name, obj, GetDictPtr());
+  AddToDictionary(name, obj, GetDictionaryPointer());
 }
 
 #endif /* DICTIONARY_H */
