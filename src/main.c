@@ -10,6 +10,7 @@
 #include "hal/bsp.h"
 #include "forth/dictionary.h"
 #include "forth/words.h"
+#include "forth/parse.h"
 
 jmp_buf env;
 uint8_t state;
@@ -18,6 +19,7 @@ int main(void) {
   state = 0;
   setjmp(env);
   for (;;) {
+    ForthPrint("HOLY SHIT !!");
     interpret();
   }
 }

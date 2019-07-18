@@ -7,6 +7,8 @@
  */
 
 #include "forth/tib.h"
+#include "forth/words.h"
+
 /* Terminal Input Buffer FIFO cycle */
 uint8_t terminal_buffer[TIB_SIZE];
 uint8_t terminal_buffer_get_index;

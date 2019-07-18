@@ -162,10 +162,12 @@ DEFCODE(exe_word, "CHAR", 0, _char,
 DEFCODE(_char, ".S", 0, print_stack,
         " ( -- c ) put the ASCII code of the first character of the next word",
         { PrintStack(); });
-DEFCODE(print_stack, "PAUSE", 0, pause,
-        " multi-tasking",
+DEFCODE(print_stack, "PAUSE", 0, pause, " multi-tasking",
         /* TODO: multi-tasking */
-        { ; });
+        {
+          volatile x = 0;
+          x++;
+        });
 
 /* @ EXECUTE ( xt -- ) jump to the address on the stack */
 /* 	defcode "EXECUTE",7,,EXECUTE */

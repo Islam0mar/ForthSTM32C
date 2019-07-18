@@ -53,7 +53,7 @@ void SystemInit(void) {
   /* Set HSION bit */
   RCC->CR |= RCC_HSI_ON;
   /* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE and MCO bits */
-  RCC->CFGR &= 0xF0FF0000U;
+  RCC->CFGR &= 0xF8FF0000U;
   /* Reset HSEON, CSSON and PLLON bits */
   RCC->CR &= 0xFEF6FFFFU;
   /* Reset HSEBYP bit */
@@ -63,7 +63,7 @@ void SystemInit(void) {
   /* Disable all interrupts and clear pending bits  */
   RCC->CIR = 0x009F0000U;
 
-  SCB->VTOR = SRAM_BASE |
+  SCB->VTOR = FLASH_BASE |
               VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM. */
 }
 
@@ -195,7 +195,7 @@ void SystemClock_Config(void) {
    */
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
-  /* SysTick_IRQn interrupt configuration */
+  /* /\* SysTick_IRQn interrupt configuration *\/ */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
@@ -205,52 +205,41 @@ void SystemClock_Config(void) {
  * Output
  * EVENT_OUT
  * EXTI
- * Free pins are configured automatically as Analog (this feature is enabled
- * through the Code Generation settings)
  */
 void GPIO_Init() {
   GPIO_InitTypeDef GPIO_InitStruct;
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_AFIO_CLK_ENABLE();
+  __HAL_RCC_USART1_CLK_ENABLE();
 
-  /*Configure GPIO pins : PC13 PC14 PC15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PA0 PA1 PA2 PA3
-    PA4 PA5 PA6 PA7
-    PA8 PA13 PA14 PA15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 |
-                        GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 |
-                        GPIO_PIN_8 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  /**USART1 GPIO Configuration
+    PA9     ------> USART1_TX
+    PA10     ------> USART1_RX
+    */
+  GPIO_InitStruct.Pin = GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB0 PB1 PB2 PB10
-    PB11 PB12 PB13 PB14
-    PB15 PB3 PB4 PB5
-    PB6 PB7 PB8 PB9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_10 |
-                        GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 |
-                        GPIO_PIN_15 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 |
-                        GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = GPIO_PIN_10;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
 
 /* USART1 init function */
 void UART1_Init() {
-  __HAL_RCC_USART1_CLK_ENABLE();
   huart1.Instance = USART1;
   huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_ODD;
+  huart1.Init.Parity = UART_PARITY_NONE;
   huart1.Init.Mode = UART_MODE_TX_RX;
   huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
@@ -270,6 +259,11 @@ void UART1_Send(char s[]) {
   HAL_UART_Transmit(&huart1, (uint8_t *)s, strlen(s), 10);
 }
 
+void SysTick_Handler(void) {
+  HAL_IncTick();
+  HAL_SYSTICK_IRQHandler();
+}
+
 void USART1_IRQHandler(void) { HAL_UART_IRQHandler(&huart1); }
 
 /* This callback is called by the HAL_UART_IRQHandler when the given number of
@@ -277,8 +271,10 @@ void USART1_IRQHandler(void) { HAL_UART_IRQHandler(&huart1); }
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart->Instance == USART1) {
     /* Receive one byte in interrupt mode */
-    uint8_t index = ++terminal_buffer_get_index & (TIB_SIZE - 1);
-    HAL_UART_Receive_IT(&huart1, &terminal_buffer[index], 1);
+    HAL_UART_Receive_IT(&huart1, &terminal_buffer[terminal_buffer_insert_index],
+                        1);
+    terminal_buffer_insert_index += 1;
+    terminal_buffer_insert_index &= (TIB_SIZE - 1);
   }
 }
 
@@ -304,9 +300,11 @@ void _Error_Handler(char *file, int line) {
  *
  * @return     return type
  */
-__attribute__((naked)) void assert_failed(char const *file, int line) {
+/* __attribute__((naked)) */ void assert_failed(char const *file, int line) {
   /* TBD: damage control */
-  NVIC_SystemReset(); /* reset the system */
+  /* NVIC_SystemReset(); /\* reset the system *\/ */
+  while (1) {
+  }
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

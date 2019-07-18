@@ -48,7 +48,7 @@ void ForthWarning(const char *err_message, const char *word) {
   SendMsg("Executing continues...");
   quit();
 }
-inline void ForthPrint(char *s) { SendMsg(s); }
+void ForthPrint(char *s) { SendMsg(s); }
 
 ForthObject StrToForthObj(const char *s) {
   static char *end;

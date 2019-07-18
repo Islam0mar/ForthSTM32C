@@ -62,9 +62,9 @@ set(LINKER_SCRIPT ${PROJECT_SOURCE_DIR}/STM32F103C8T6.ld)
 #set(CMAKE_EXE_LINKER_FLAGS "-v -T ${LINKER_SCRIPT}")
 set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} -Wl,--gc-sections -mthumb -mcpu=cortex-m3 --specs=nosys.specs")
 
-set(CMAKE_C_FLAGS "-ggdb -mthumb -save-temps -mcpu=cortex-m3 -fno-builtin -DUSE_HAL_DRIVER -DSTM32F103xB -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections")
-set(CMAKE_CXX_FLAGS "-mthumb -mcpu=cortex-m3 -fno-builtin -Wall std=c++11 -ffreestanding  -fdata-sections -ffunction-sections")
-set(CMAKE_ASM_FLAGS "-mimplicit-it=always -gdb3 -mthumb -mcpu=cortex-m3")
+set(CMAKE_C_FLAGS "-ggdb3 -O0 -mthumb -save-temps -mcpu=cortex-m3 -fno-builtin -DUSE_HAL_DRIVER -DSTM32F103xB -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections")
+set(CMAKE_CXX_FLAGS " -mthumb -mcpu=cortex-m3 -fno-builtin -Wall std=c++11 -ffreestanding  -fdata-sections -ffunction-sections")
+set(CMAKE_ASM_FLAGS "-mimplicit-it=always -ggdb3 -mthumb -mcpu=cortex-m3")
 # SYS_OBJECTS = #Long list of object files
 # INCLUDE_PATHS = -I. -I./source -I./mbed -I./mbed/TARGET_NUCLEO_F446RE -I./mbed/TARGET_NUCLEO_F446RE/TARGET_STM -I./mbed/TARGET_NUCLEO_F446RE/TARGET_STM/TARGET_STM32F4 -I./mbed/TARGET_NUCLEO_F446RE/TARGET_STM/TARGET_STM32F4/TARGET_NUCLEO_F446RE -I./mbed/TARGET_NUCLEO_F446RE/TOOLCHAIN_GCC_ARM 
 # LIBRARY_PATHS = -L./mbed/TARGET_NUCLEO_F446RE/TOOLCHAIN_GCC_ARM 
@@ -84,11 +84,11 @@ COMMAND ${CMAKE_SIZE} -A -x -t  $<TARGET_FILE:${PROJECT_NAME}.elf>
 # COMMAND make main.c.s
 # COMMAND ${CMAKE_C_COMPILER} -S  ${PROJECT_PATH}/src/main.c -fverbose-asm -Ofast -mthumb -mcpu=cortex-m3 -fno-builtin -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections -o ${ASM_FILE} -I${PROJECT_PATH}/include
 COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE} \nBuilding ${LIST_FILE}")
-  
+
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
- 
+
 # upload
 # /* st-flash write forth.bin 0x08000000 */
 
