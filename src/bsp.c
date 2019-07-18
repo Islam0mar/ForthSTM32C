@@ -21,9 +21,7 @@ const uint8_t AHBPrescTable[16U] = {0, 0, 0, 0, 0, 0, 0, 0,
                                     1, 2, 3, 4, 6, 7, 8, 9};
 const uint8_t APBPrescTable[8U] = {0, 0, 0, 0, 1, 2, 3, 4};
 
-uint8_t terminal_buffer[TIB_SIZE];
-uint8_t terminal_buffer_get_index = 0;
-uint8_t terminal_buffer_insert_index = 0;
+void USART1_IRQHandler();
 
 void Init() {
   /* Reset of all peripherals, Initializes the Flash interface and the Systick.
@@ -32,11 +30,13 @@ void Init() {
   SystemClock_Config();
   GPIO_Init();
   UART1_Init();
+
   /* To not be optimized */
-  {
-    uint8_t byte;
-    HAL_UART_Receive_IT(&huart1, &byte, 1);
-  }
+  HAL_UART_Receive_IT(&huart1, &terminal_buffer[terminal_buffer_insert_index],
+                      1);
+  USART1_IRQHandler();
+  /* __HAL_UART_ENABLE_IT(&huart1,UART_IT_RXNE); */
+  /* __enable_irq();  */
 }
 
 /**
@@ -270,11 +270,11 @@ void USART1_IRQHandler(void) { HAL_UART_IRQHandler(&huart1); }
  * bytes are received */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart->Instance == USART1) {
+    terminal_buffer_insert_index += 1;
+    terminal_buffer_insert_index &= (TIB_SIZE - 1);
     /* Receive one byte in interrupt mode */
     HAL_UART_Receive_IT(&huart1, &terminal_buffer[terminal_buffer_insert_index],
                         1);
-    terminal_buffer_insert_index += 1;
-    terminal_buffer_insert_index &= (TIB_SIZE - 1);
   }
 }
 

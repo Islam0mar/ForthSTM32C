@@ -127,4 +127,5 @@ bool AddToDictionary(char *name, ForthObject obj, Dictionary *pd) {
     /* FIXME: memleak */
     return AddToHead(entry, pd);
   }
+  return true;
 }

@@ -6,22 +6,19 @@
  *
  */
 
-
+#include "forth/forth.h"
 #include "hal/bsp.h"
-#include "forth/dictionary.h"
-#include "forth/words.h"
-#include "forth/parse.h"
 
 jmp_buf env;
-uint8_t state;
+uint8_t state = 0;
 int main(void) {
   Init();
   state = 0;
+  ForthPrint("CForth ");
+  ForthPrint(FORTH_VERSION_STRING);
+  ForthPrint("\n");
   setjmp(env);
   for (;;) {
-    ForthPrint("HOLY SHIT !!");
     interpret();
   }
 }
-
-  

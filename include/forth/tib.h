@@ -16,11 +16,12 @@
 
 /* Terminal Input Buffer FIFO cycle */
 extern uint8_t terminal_buffer[TIB_SIZE];
-extern char pad[PAD_SIZE];
+extern uint8_t terminal_buffer_get_index;
+extern uint8_t terminal_buffer_insert_index;
+extern uint8_t pad[PAD_SIZE];
 uint8_t TIBGetIndex();
-uint8_t *TIBGetAddrs();
 void TIBIncrementIndex();
-char TIBReadChar();
+uint8_t TIBReadChar();
 bool TIBEmpty();
 void TIBFlush();
 

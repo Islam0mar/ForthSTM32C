@@ -51,8 +51,8 @@ void ForthWarning(const char *err_message, const char *word) {
 void ForthPrint(char *s) { SendMsg(s); }
 
 ForthObject StrToForthObj(const char *s) {
-  static char *end;
-  static void *r;
+  static char *end = NULL;
+  static ForthData r;
   static uint8_t i;
   static ForthType t;
   static float f;
@@ -74,27 +74,28 @@ ForthObject StrToForthObj(const char *s) {
   switch (t) {
     case kSingleFloat: {
       f = strtof(s, &end);
-      r = &f;
+      r = (ForthData)&f;
       break;
     }
     case kDoubleFloat: {
       d = strtod(s, &end);
-      r = &d;
+      r = (ForthData)&d;
       break;
     }
     case kLongDoubleFloat: {
       ld = strtold(s, &end);
-      r = &ld;
+      r = (ForthData)&ld;
       break;
     }
 
     default:
       ll = strtoll(s, &end, 0);
-      r = &ll;
       if (FORTH_IS_FIXNUM_VAL(ll)) {
         t = kFixNum;
+        r = ll;
       } else if (FORTH_IS_BIGNUM_VAL(ll)) {
         t = kBigNum;
+        r = (ForthData)&ll;
       } else {
         errno = ERANGE;
       }
@@ -102,9 +103,9 @@ ForthObject StrToForthObj(const char *s) {
   }
   if (errno == ERANGE) {
     errno = 0;
-    ForthError("RANGE ERROR", pad);
-  } else if (end != NULL) {  // not integer
-    ForthError("NOT RECOGNIZED", pad);
+    ForthError("RANGE ERROR", s);
+  } else if (*end != '\0') {  // not integer
+    ForthError("NOT RECOGNIZED", s);
   }
-  return ForthCreateObject((ForthData)r, t);
+  return ForthCreateObject(r, t);
 }

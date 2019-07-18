@@ -28,16 +28,16 @@ extern const uint32_t flash_end;
 #define BITMASK_CLEAR(x, f) ((x) &= (~(f)))
 #define BITMASK_CHECK_CLEAR(x, f) (((x) &= (f)) == 0)
 #define BITMASK_CHECK_SET(x, f) (((x) &= (f)) != 0)
-#define F_EXE 0x01U
+#define F_CMP 0x01U
 #define F_CMP_FLASH 0x02U
-#define FORTH_IS_EXE_STATE BITMASK_CHECK_SET(state, F_EXE)           //  exe
-#define FORTH_IS_CMP_STATE BITMASK_CHECK_CLEAR(state, F_EXE)         //  exe
+#define FORTH_IS_CMP_STATE BITMASK_CHECK_SET(state, F_CMP)           //  exe
+#define FORTH_IS_EXE_STATE BITMASK_CHECK_CLEAR(state, F_CMP)         //  exe
 #define FORTH_IS_CMP_TO_FLASH BITMASK_CHECK_SET(state, F_CMP_FLASH)  //  exe
 #define FORTH_IS_CMP_TO_RAM BITMASK_CHECK_CLEAR(state, F_CMP_FLASH)  //  exe
 #define FORTH_CMP_TO_FLASH() BITMASK_SET(state, F_CMP_FLASH)         //  exe
 #define FORTH_CMP_TO_RAM() BITMASK_CLEAR(state, F_CMP_FLASH)         //  exe
-#define FORTH_EXE_STATE() BITMASK_SET(state, F_EXE)                  //  exe
-#define FORTH_CMP_STATE() BITMASK_CLEAR(state, F_EXE)                //  exe
+#define FORTH_CMP_STATE() BITMASK_SET(state, F_CMP)                  //  exe
+#define FORTH_EXE_STATE() BITMASK_CLEAR(state, F_CMP)                //  exe
 
 typedef intptr_t ForthData;
 typedef int32_t ForthFixNum;

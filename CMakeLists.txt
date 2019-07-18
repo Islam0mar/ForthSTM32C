@@ -97,6 +97,8 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 # arm-none-eabi-gdb -tui --command=attach.gdb forth.elf
 # i r "info register" , i r r1
+# b
+# clean 
 # continue
 
 # generate asm from C/C++ 

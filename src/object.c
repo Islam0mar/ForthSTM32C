@@ -18,7 +18,7 @@ static inline void *ForthAlloc(ForthIndex s) {
   return temp;
 }
 
-static inline void *ForthRealloc(ForthData d, ForthIndex s) {
+static inline void *ForthRealloc(void *d, ForthIndex s) {
   d = realloc(d, s);
   if (d == NULL) {
     ForthError("ALLOCATION FAILED!", "ForthRealloc");
@@ -27,10 +27,10 @@ static inline void *ForthRealloc(ForthData d, ForthIndex s) {
 }
 
 ForthData ForthCreateData(ForthType t) {
-  static ForthData data = NULL;
+  static ForthData data = 0;
   switch (FORTH_TYPE_MASK(t)) {
     case kCons: {
-      data = ForthAlloc(sizeof(ForthCons));
+      data = (ForthData)ForthAlloc(sizeof(ForthCons));
       break;
     }
     case kFixNum: {
@@ -38,27 +38,27 @@ ForthData ForthCreateData(ForthType t) {
       break;
     }
     case kBigNum: {
-      data = ForthAlloc(sizeof(ForthBigNum));
+      data = (ForthData)ForthAlloc(sizeof(ForthBigNum));
       break;
     }
     case kSingleFloat: {
-      data = ForthAlloc(sizeof(float));
+      data = (ForthData)ForthAlloc(sizeof(float));
       break;
     }
     case kDoubleFloat: {
-      data = ForthAlloc(sizeof(double));
+      data = (ForthData)ForthAlloc(sizeof(double));
       break;
     }
     case kLongDoubleFloat: {
-      data = ForthAlloc(sizeof(long double));
+      data = (ForthData)ForthAlloc(sizeof(long double));
       break;
     }
     case kVector: {
-      data = ForthAlloc(sizeof(ForthVector));
+      data = (ForthData)ForthAlloc(sizeof(ForthVector));
       break;
     }
     case kPointer: {
-      data = NULL;
+      data = 0;
       break;
     }
     default:
@@ -127,7 +127,7 @@ ForthObject ForthCreateEmptyVector() {
 ForthObject ForthCreateVector(ForthObject x) {
   ForthObject obj;
   obj = ForthCreateEmptyVector();
-  ForthAddToVector(x, obj.data);
+  ForthAddToVector(x,(ForthVector *) obj.data);
   return obj;
 }
 
@@ -186,34 +186,34 @@ void ForthRemoveObject(ForthObject obj) {
       ForthData d = obj.data;
       ForthRemoveObject(FORTH_CONS_CAR(d));
       ForthRemoveObject(FORTH_CONS_CDR(d));
-      free(d);
+      free((void *)d);
       break;
     }
     case kFixNum: {
       break;
     }
     case kBigNum: {
-      free(obj.data);
+      free((void *)obj.data);
       break;
     }
     case kSingleFloat: {
-      free(obj.data);
+      free((void *)obj.data);
       break;
     }
     case kDoubleFloat: {
-      free(obj.data);
+      free((void *)obj.data);
       break;
     }
     case kLongDoubleFloat: {
-      free(obj.data);
+      free((void *)obj.data);
       break;
     }
     case kVector: {
-      free(obj.data);
+      free((void *)obj.data);
       break;
     }
     case kPointer: {
-      free(obj.data);
+      free((void *)obj.data);
       break;
     }
     default:

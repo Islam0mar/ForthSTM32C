@@ -165,6 +165,4 @@ void PrintObject(StackEntry item) {
   ForthPrint(itoa(item.data, 16));
 }
 /* print stack */
-void PrintStack() {
-  TraverseStack(STACK_PTR, TraverseStack);
-}
+void PrintStack() { TraverseStack(STACK_PTR, PrintObject); }

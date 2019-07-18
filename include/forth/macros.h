@@ -11,9 +11,7 @@
 
 #include "dictionary.h"
 /* gcc -E words.h -o o.c */
-#define VERSION_MAJOR 1
-#define VERSION_MINOR 0
-#define VERSION_PATCH 0
+
 /* From */
 /* https://www.embedded.com/design/programming-languages-and-tools/4443209/Template-meta-programming-in-C-vs-opaque-pointer
  */

@@ -11,8 +11,8 @@
 
 #include "global.h"
 
-#define FORTH_IS_FIXNUM_VAL(x) (x <= INT32_MAX && x >= INT_LEAST32_MAX)
-#define FORTH_IS_BIGNUM_VAL(x) (x <= INT64_MAX && x >= INT_LEAST64_MAX)
+#define FORTH_IS_FIXNUM_VAL(x) (x <= INTPTR_MAX && x >= INTPTR_MIN)
+#define FORTH_IS_BIGNUM_VAL(x) (x <= INT64_MAX && x >= INT64_MIN)
 #define FORTH_TYPE_MASK(t) ((ForthFixNum)(t)&kTypeMask)
 #define FORTH_FLAG_MASK(t) ((ForthFixNum)(t) & !kTypeMask)
 #define FORTH_IS_IMMEDIATE(o) (FORTH_TYPE_MASK(o.type) == kFixNum)
@@ -42,20 +42,20 @@ void ForthRemoveFreeObject(ForthObject obj);
 #define CONS(a, d) ForthCreateCons((a), (d))
 #define ACONS(a, b, c) ForthCreateCons(ForthCreateCons((a), (b)), (c))
 #define FORTH_FIXNUM(x) ((ForthFixNum)(x))
-#define FORTH_BIGNUM(x) (*(ForthBigNum*)x)
+#define FORTH_BIGNUM(x) (*(ForthBigNum *)x)
 #define FORTH_SFLOAT(x) (*(float *)x)
-#define FORTH_DFLOAT(x) (*(double*)x)
-#define FORTH_LDFLOAT(x) (*(long double*)x)
+#define FORTH_DFLOAT(x) (*(double *)x)
+#define FORTH_LDFLOAT(x) (*(long double *)x)
 #define FORTH_CFUN(x) (*(ForthFuncPtr *)x)
 
 static inline ForthObject ForthCar(ForthObject x) {
-  if (x.data == NULL) return x;
+  if (x.data == 0) return x;
   x = FORTH_CONS_CAR(x.data);
   return x;
 }
 
 static inline ForthObject ForthCdr(ForthObject x) {
-  if (x.data == NULL) return x;
+  if (x.data == 0) return x;
   x = FORTH_CONS_CDR(x.data);
   return x;
 }

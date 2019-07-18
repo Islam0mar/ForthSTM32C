@@ -68,9 +68,12 @@ DEFCODE(is_key, "WORD", 0, word,
                 break;
               }
             }
+            if (i > 0) {
+              break;
+            }
           }
           PushTOS();
-          UpdateTOSWithValueType(pad, kPointer);
+          UpdateTOSWithValueType((ForthData)pad, kPointer);
           PushTOS();
           UpdateTOSWithValueType(i, kFixNum);
         });
@@ -79,13 +82,16 @@ DEFCODE(word, "(FIND)", 0, paren_find, "( addr length -- dictionary_address )",
         {
           PopTOS();
           UpdateTOSWithValueType(
-              FindDictionaryItem(GetTOSPtr()->data, GetDictionaryPointer()),
+              (ForthData)FindDictionaryItem((char *)GetTOSPtr()->data,
+                                            GetDictionaryPointer()),
               kPointer);
         });
 
 DEFCODE(paren_find, ">CFA", 0, tcfa,
-        "( dictionary_address -- executable_address )",
-        { UpdateTOSWithObject(GetDictionaryEntryObject(GetTOSPtr()->data)); });
+        "( dictionary_address -- executable_address )", {
+          UpdateTOSWithObject(
+              GetDictionaryEntryObject((DictionaryNode *)GetTOSPtr()->data));
+        });
 
 DEFCODE(tcfa, ">DFA", 0, tdfa, "( dictionary_address -- data_field_address )",
         { tcfa(); });
@@ -94,8 +100,9 @@ DEFCODE(tdfa, ",", 0, comma,
         "( n -- ) writes the top element from the stack at DP", {
           if (FORTH_IS_CMP_TO_FLASH) {
           } else {
-            ForthAddToVector(*GetTOSPtr(),
-                             GetDictionaryPointer()->head->entry.object.data);
+            ForthAddToVector(
+                (ForthObject)*GetTOSPtr(),
+                (ForthVector *)GetDictionaryPointer()->head->entry.object.data);
             PopTOS();
           }
           /* here */
@@ -106,11 +113,13 @@ always override it later with a more powerful one!
 */
 DEFCODE(comma, "INTERPRET", 0, interpret, "Interpret inputs", {
   word();
-  ForthObject parsed_number = *GetTOSPtr();
+  static ForthObject parsed_number;
+  PopPSP(&parsed_number);
+  PushPSP(parsed_number);
   paren_find();
   /* word not found in dict */
   if (GetTOSPtr()->data == NULL) {
-    parsed_number = StrToForthObj(parsed_number.data);
+    parsed_number = StrToForthObj((char *)parsed_number.data);
     if (FORTH_IS_EXE_STATE) { /* exec */
       /* PushTOS(); */
       *GetTOSPtr() = parsed_number;
@@ -119,7 +128,8 @@ DEFCODE(comma, "INTERPRET", 0, interpret, "Interpret inputs", {
       comma();
     }
   } else { /* word found in dict */
-    char *word_name = GetDictionaryEntryName(GetTOSPtr()->data);
+    char *word_name =
+        GetDictionaryEntryName((DictionaryNode *)GetTOSPtr()->data);
     tcfa(); /* >CFA */
     ForthType t = GetTOSPtr()->type;
     /* immediate word */
@@ -165,7 +175,7 @@ DEFCODE(_char, ".S", 0, print_stack,
 DEFCODE(print_stack, "PAUSE", 0, pause, " multi-tasking",
         /* TODO: multi-tasking */
         {
-          volatile x = 0;
+          volatile int x = 0;
           x++;
         });
 
