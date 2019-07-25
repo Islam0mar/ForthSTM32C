@@ -23,7 +23,7 @@ const uint8_t APBPrescTable[8U] = {0, 0, 0, 0, 1, 2, 3, 4};
 
 void USART1_IRQHandler();
 
-void Init() {
+void BspInit() {
   /* Reset of all peripherals, Initializes the Flash interface and the Systick.
    */
   HAL_Init();

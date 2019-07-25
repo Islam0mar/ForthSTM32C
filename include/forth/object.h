@@ -14,7 +14,7 @@
 #define FORTH_IS_FIXNUM_VAL(x) (x <= INTPTR_MAX && x >= INTPTR_MIN)
 #define FORTH_IS_BIGNUM_VAL(x) (x <= INT64_MAX && x >= INT64_MIN)
 #define FORTH_TYPE_MASK(t) ((ForthFixNum)(t)&kTypeMask)
-#define FORTH_FLAG_MASK(t) ((ForthFixNum)(t) & !kTypeMask)
+#define FORTH_FLAG_MASK(t) ((ForthFixNum)(t) & ~kTypeMask)
 #define FORTH_IS_IMMEDIATE(o) (FORTH_TYPE_MASK(o.type) == kFixNum)
 #define FORTH_IS_CONS(o) (FORTH_TYPE_MASK(o.type) == kCons)
 #define FORTH_IS_CMPO(o) ((FORTH_FLAG_MASK(o.type) & kCompileOnly) != 0)

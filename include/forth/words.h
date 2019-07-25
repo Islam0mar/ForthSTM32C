@@ -14,4 +14,6 @@
 #include "macros_words_implementations.h"
 #undef FORTH_DEFINE_HEADERS
 
+void WordsInit();
+
 #endif /* WORDS_H */

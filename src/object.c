@@ -127,7 +127,7 @@ ForthObject ForthCreateEmptyVector() {
 ForthObject ForthCreateVector(ForthObject x) {
   ForthObject obj;
   obj = ForthCreateEmptyVector();
-  ForthAddToVector(x,(ForthVector *) obj.data);
+  ForthAddToVector(x, (ForthVector *)obj.data);
   return obj;
 }
 
@@ -223,7 +223,7 @@ void ForthRemoveObject(ForthObject obj) {
 }
 
 void ForthRemoveFreeObject(ForthObject obj) {
-  if (FORTH_FLAG_MASK(obj.type) == kFree) {
+  if (BITMASK_CHECK_SET(obj.type, kFree)) {
     ForthRemoveObject(obj);
   }
 }

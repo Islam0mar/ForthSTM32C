@@ -25,7 +25,8 @@ void PushPSP(StackEntry);
 
 void PopTOS();
 void PushTOS();
-void UpdateTOSWithValueType(ForthData val, ForthType t);
+void UpdateTOSWithFreeValueType(ForthData val, ForthType t);
+void UpdateTOSWithNonFreeValueType(ForthData val, ForthType t);
 void UpdateTOSWithObject(StackEntry);
 StackEntry *GetTOSPtr();
 

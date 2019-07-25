@@ -31,7 +31,7 @@ void _Error_Handler(char *, int);
 void SystemClock_Config();
 void UART1_Init();
 void GPIO_Init();
-void Init();
+void BspInit();
 void UART1_Send(char s[]);
 extern void SystemInit(void);
 extern void SystemCoreClockUpdate(void);

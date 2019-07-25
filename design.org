@@ -42,5 +42,6 @@
 |             |      |     |
 |             |      |     |
 |             |      |     |
-
-
+|             |      |     |
+** TODO fix uart buffer overflow
+** TODO resolve stack pops and pushs

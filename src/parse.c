@@ -16,12 +16,13 @@
 
 char *itoa(int val, int base) {
   static char buf[32] = {0};
+  int i = 31;
 
-  int i = 30;
-
-  for (; val && i; --i, val /= base) {
+  do {
     buf[i] = "0123456789abcdef"[val % base];
-  }
+    --i;
+    val /= base;
+  } while (val && i);
 
   return &buf[i + 1];
 }
@@ -33,7 +34,7 @@ void ForthError(const char *err_message, const char *word) {
   char buf[kSize + 1];  // note +1 for terminating null byte
   snprintf(buf, sizeof buf, fmt, err_message, word);
   SendMsg(buf);
-  SendMsg("Excuting QUIT...");
+  SendMsg("Excuting QUIT...\n");
   TIBFlush();
   quit();
 }
@@ -45,7 +46,7 @@ void ForthWarning(const char *err_message, const char *word) {
   char buf[kSize + 1];  // note +1 for terminating null byte
   snprintf(buf, sizeof buf, fmt, err_message, word);
   SendMsg(buf);
-  SendMsg("Executing continues...");
+  SendMsg("Execution continues...\n");
   quit();
 }
 void ForthPrint(char *s) { SendMsg(s); }

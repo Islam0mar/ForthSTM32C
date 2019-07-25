@@ -26,6 +26,10 @@ void UpdateTOSWithValueType(ForthData val, ForthType t) {
   ForthRemoveFreeObject(tos);
   tos = ForthCreateObject(val, t | kFree);
 }
+void UpdateTOSWithNonFreeValueType(ForthData val, ForthType t) {
+  ForthRemoveFreeObject(tos);
+  tos = ForthCreateObject(val, t);
+}
 void UpdateTOSWithObject(StackEntry s) {
   ForthRemoveFreeObject(tos);
   tos = s;
@@ -162,7 +166,12 @@ void PrintObject(StackEntry item) {
   /*     ForthError("UNKNOWN TYPE", "ForthCreateData"); */
   /*     break; */
   /* } */
-  ForthPrint(itoa(item.data, 16));
+  ForthPrint(itoa(item.data, base));
+  ForthPrint(" ");
 }
 /* print stack */
-void PrintStack() { TraverseStack(STACK_PTR, PrintObject); }
+void PrintStack() {
+  ForthPrint("S< ");
+  TraverseStack(STACK_PTR, PrintObject);
+  ForthPrint(">\n");
+}

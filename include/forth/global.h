@@ -21,13 +21,14 @@
 /* The built-in variables are: */
 extern jmp_buf env;
 extern uint8_t state;  // execute, compiling, flash, RAM
+extern uint8_t base;  // number base
 extern void *here;
 extern const uint32_t flash_end;
 
 #define BITMASK_SET(x, f) ((x) |= (f))
 #define BITMASK_CLEAR(x, f) ((x) &= (~(f)))
-#define BITMASK_CHECK_CLEAR(x, f) (((x) &= (f)) == 0)
-#define BITMASK_CHECK_SET(x, f) (((x) &= (f)) != 0)
+#define BITMASK_CHECK_CLEAR(x, f) (((x) & (f)) == 0)
+#define BITMASK_CHECK_SET(x, f) (((x) & (f)) != 0)
 #define F_CMP 0x01U
 #define F_CMP_FLASH 0x02U
 #define FORTH_IS_CMP_STATE BITMASK_CHECK_SET(state, F_CMP)           //  exe

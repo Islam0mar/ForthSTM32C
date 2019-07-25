@@ -11,9 +11,10 @@
 
 jmp_buf env;
 uint8_t state = 0;
+uint8_t base = 10;
 int main(void) {
-  Init();
-  state = 0;
+  BspInit();
+  WordsInit();
   ForthPrint("CForth ");
   ForthPrint(FORTH_VERSION_STRING);
   ForthPrint("\n");

@@ -73,7 +73,7 @@ DEFCODE(is_key, "WORD", 0, word,
             }
           }
           PushTOS();
-          UpdateTOSWithValueType((ForthData)pad, kPointer);
+          UpdateTOSWithNonFreeValueType((ForthData)pad, kPointer);
           PushTOS();
           UpdateTOSWithValueType(i, kFixNum);
         });
@@ -81,7 +81,7 @@ DEFCODE(is_key, "WORD", 0, word,
 DEFCODE(word, "(FIND)", 0, paren_find, "( addr length -- dictionary_address )",
         {
           PopTOS();
-          UpdateTOSWithValueType(
+          UpdateTOSWithNonFreeValueType(
               (ForthData)FindDictionaryItem((char *)GetTOSPtr()->data,
                                             GetDictionaryPointer()),
               kPointer);
@@ -118,7 +118,7 @@ DEFCODE(comma, "INTERPRET", 0, interpret, "Interpret inputs", {
   PushPSP(parsed_number);
   paren_find();
   /* word not found in dict */
-  if (GetTOSPtr()->data == NULL) {
+  if (GetTOSPtr()->data == 0) {
     parsed_number = StrToForthObj((char *)parsed_number.data);
     if (FORTH_IS_EXE_STATE) { /* exec */
       /* PushTOS(); */
@@ -145,7 +145,7 @@ DEFCODE(comma, "INTERPRET", 0, interpret, "Interpret inputs", {
 });
 
 DEFCODE(interpret, "EXECUTE-WORD", 0, exe_word, "execute word", {
-  if (FORTH_FLAG_MASK(GetTOSPtr()->type) == kExecutable) {
+  if (BITMASK_CHECK_SET(GetTOSPtr()->type, kExecutable)) {
     if (FORTH_TYPE_MASK(GetTOSPtr()->type) == kPointer) {
       (*(ForthFuncPtr)GetTOSPtr()->data)();
     } else { /* vector of words */
