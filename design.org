@@ -43,5 +43,9 @@
 |             |      |     |
 |             |      |     |
 |             |      |     |
-** TODO fix uart buffer overflow
+** DONE fix uart buffer overflow
+   CLOSED: [2019-07-27 Sat 23:41]
 ** TODO resolve stack pops and pushs
+** TODO check types for maths operations
+** TODO uniform error messages
+** TODO uniform function names

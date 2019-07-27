@@ -10,6 +10,7 @@
 
 #include "forth/object.h"
 #include "forth/parse.h"
+#include "forth/stack.h"
 #include "forth/tib.h"
 #include "forth/words.h"
 #include "hal/bsp.h"
@@ -47,8 +48,8 @@ void ForthWarning(const char *err_message, const char *word) {
   snprintf(buf, sizeof buf, fmt, err_message, word);
   SendMsg(buf);
   SendMsg("Execution continues...\n");
-  quit();
 }
+
 void ForthPrint(char *s) { SendMsg(s); }
 
 ForthObject StrToForthObj(const char *s) {
@@ -61,7 +62,7 @@ ForthObject StrToForthObj(const char *s) {
   static long double ld;
   static long long ll;
   t = kPointer;
-  for (; s[i] != '\0'; i++) {
+  for (i = 0; s[i] != '\0'; i++) {
   }
   if (i > 2) {
     if (toupper(s[i - 2]) == 'S' && s[i - 1] == '0') {
@@ -104,8 +105,10 @@ ForthObject StrToForthObj(const char *s) {
   }
   if (errno == ERANGE) {
     errno = 0;
+    PopTOS();
     ForthError("RANGE ERROR", s);
   } else if (*end != '\0') {  // not integer
+    PopTOS();
     ForthError("NOT RECOGNIZED", s);
   }
   return ForthCreateObject(r, t);

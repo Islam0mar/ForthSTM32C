@@ -19,6 +19,7 @@ int main(void) {
   ForthPrint(FORTH_VERSION_STRING);
   ForthPrint("\n");
   setjmp(env);
+  IrqOn();
   for (;;) {
     interpret();
   }

@@ -32,6 +32,8 @@ void SystemClock_Config();
 void UART1_Init();
 void GPIO_Init();
 void BspInit();
+void IrqOn();
+void IrqOff();
 void UART1_Send(char s[]);
 extern void SystemInit(void);
 extern void SystemCoreClockUpdate(void);

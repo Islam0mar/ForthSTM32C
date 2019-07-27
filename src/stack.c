@@ -120,10 +120,10 @@ void ClearStack(Stack *ps) { ps->top = 0; }
 
 /*
 Pre:   The stack has been created.
-Post:  Visit Each element in the stack from the top to the bottom.
+Post:  Visit Each element in the stack from the bottom to the top.
 */
 void TraverseStack(Stack *ps, void (*pvisit)(StackEntry)) {
-  for (int i = ps->top; i > 0; i--) (*pvisit)(ps->entry[i - 1]);
+  for (int i = 0; i < ps->top; i++) (*pvisit)(ps->entry[i]);
 } /* void TraverseStack */
 
 /* helper fun for print */
@@ -173,5 +173,7 @@ void PrintObject(StackEntry item) {
 void PrintStack() {
   ForthPrint("S< ");
   TraverseStack(STACK_PTR, PrintObject);
+  ForthPrint(itoa(GetTOSPtr()->data, base));
+  ForthPrint(" ");
   ForthPrint(">\n");
 }

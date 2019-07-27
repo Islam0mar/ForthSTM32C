@@ -22,8 +22,10 @@
    http://en.wikipedia.org/wiki/REPL).
 */
 FIRSTDEFCODE("QUIT", 0, quit,
-             "Quit your program and start again at the user prompt",
-             { longjmp(env, 0); });
+             "Quit your program and start again at the user prompt", {
+               IrqOff();
+               longjmp(env, 0);
+             });
 
 DEFCODE(quit, "KEY", 0, key, "( -- c ) Receive one character", {
   PushTOS();
@@ -145,9 +147,12 @@ DEFCODE(comma, "INTERPRET", 0, interpret, "Interpret inputs", {
 });
 
 DEFCODE(interpret, "EXECUTE-WORD", 0, exe_word, "execute word", {
+  static ForthFuncPtr func;
   if (BITMASK_CHECK_SET(GetTOSPtr()->type, kExecutable)) {
     if (FORTH_TYPE_MASK(GetTOSPtr()->type) == kPointer) {
-      (*(ForthFuncPtr)GetTOSPtr()->data)();
+      func = (ForthFuncPtr)GetTOSPtr()->data;
+      PopTOS();
+      (*func)();
     } else { /* vector of words */
       static ForthVector *v;
       static uint8_t i;
@@ -158,7 +163,6 @@ DEFCODE(interpret, "EXECUTE-WORD", 0, exe_word, "execute word", {
         exe_word();
       }
     }
-    PopTOS();
   }
 });
 DEFCODE(exe_word, "CHAR", 0, _char,
@@ -172,7 +176,46 @@ DEFCODE(exe_word, "CHAR", 0, _char,
 DEFCODE(_char, ".S", 0, print_stack,
         " ( -- c ) put the ASCII code of the first character of the next word",
         { PrintStack(); });
-DEFCODE(print_stack, "PAUSE", 0, pause, " multi-tasking",
+DEFCODE(print_stack, ".", 0, _print, " print word",
+        { ForthPrint(itoa(GetTOSPtr()->data, base)); });
+
+DEFCODE(_print, "+", 0, plus, " a b -- a+b ", {
+  static ForthObject obj;
+  switch (FORTH_TYPE_MASK(GetTOSPtr()->type)) {
+    case kFixNum: {
+      PopPSP(&obj);
+      GetTOSPtr()->data += (intptr_t)obj.data;
+      break;
+    }
+    case kBigNum: {
+      PopPSP(&obj);
+      *(int64_t *)GetTOSPtr()->data += *(int64_t *)obj.data;
+      break;
+    }
+    case kSingleFloat: {
+      PopPSP(&obj);
+      *(float *)GetTOSPtr()->data += *(float *)obj.data;
+      break;
+    }
+    case kDoubleFloat: {
+      PopPSP(&obj);
+      *(double *)GetTOSPtr()->data += *(double *)obj.data;
+      break;
+    }
+    case kLongDoubleFloat: {
+      PopPSP(&obj);
+      *(long double *)GetTOSPtr()->data += *(long double *)obj.data;
+      break;
+    }
+    default:
+      PopTOS();
+      ForthError("WRONG TYPE", "+");
+      break;
+  }
+});
+
+/* SHOULD be the last word, see InitWords() */
+DEFCODE(plus, "PAUSE", 0, pause, " multi-tasking",
         /* TODO: multi-tasking */
         {
           volatile int x = 0;

@@ -23,20 +23,23 @@ const uint8_t APBPrescTable[8U] = {0, 0, 0, 0, 1, 2, 3, 4};
 
 void USART1_IRQHandler();
 
+void IrqOn() {
+  /* __HAL_UART_ENABLE_IT(&huart1,UART_IT_RXNE); */
+  __enable_irq();
+}
+void IrqOff() { __disable_irq(); }
 void BspInit() {
   /* Reset of all peripherals, Initializes the Flash interface and the Systick.
    */
   HAL_Init();
   SystemClock_Config();
-  GPIO_Init();
-  UART1_Init();
 
   /* To not be optimized */
   HAL_UART_Receive_IT(&huart1, &terminal_buffer[terminal_buffer_insert_index],
                       1);
   USART1_IRQHandler();
-  /* __HAL_UART_ENABLE_IT(&huart1,UART_IT_RXNE); */
-  /* __enable_irq();  */
+  /* __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE); */
+  __enable_irq();
 }
 
 /**
@@ -206,15 +209,21 @@ void SystemClock_Config(void) {
  * EVENT_OUT
  * EXTI
  */
-void GPIO_Init() {
+void HAL_MspInit() {
   GPIO_InitTypeDef GPIO_InitStruct;
-
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_AFIO_CLK_ENABLE();
   __HAL_RCC_USART1_CLK_ENABLE();
+  UART1_Init();
+}
+
+/* USART1 init function */
+void UART1_Init() {
+  __HAL_RCC_USART1_CLK_ENABLE();
+  GPIO_InitTypeDef GPIO_InitStruct;
 
   /**USART1 GPIO Configuration
     PA9     ------> USART1_TX
@@ -231,10 +240,7 @@ void GPIO_Init() {
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-}
 
-/* USART1 init function */
-void UART1_Init() {
   huart1.Instance = USART1;
   huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
@@ -257,6 +263,7 @@ void UART1_Init() {
 /* TODO: Check for errors */
 void UART1_Send(char s[]) {
   HAL_UART_Transmit(&huart1, (uint8_t *)s, strlen(s), 10);
+  /* __HAL_UART_FLUSH_DRREGISTER(&huart1); */
 }
 
 void SysTick_Handler(void) {
@@ -264,7 +271,12 @@ void SysTick_Handler(void) {
   HAL_SYSTICK_IRQHandler();
 }
 
-void USART1_IRQHandler(void) { HAL_UART_IRQHandler(&huart1); }
+void USART1_IRQHandler(void) {
+  /* terminal_buffer[terminal_buffer_insert_index] = USART1->DR; */
+  /* terminal_buffer_insert_index += 1; */
+  /* terminal_buffer_insert_index &= (TIB_SIZE - 1); */
+  HAL_UART_IRQHandler(&huart1);
+}
 
 /* This callback is called by the HAL_UART_IRQHandler when the given number of
  * bytes are received */
@@ -272,6 +284,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart->Instance == USART1) {
     terminal_buffer_insert_index += 1;
     terminal_buffer_insert_index &= (TIB_SIZE - 1);
+    /* needed to fix locking huart1 while transmitting */
+    __HAL_UNLOCK(&huart1);
     /* Receive one byte in interrupt mode */
     HAL_UART_Receive_IT(&huart1, &terminal_buffer[terminal_buffer_insert_index],
                         1);
@@ -285,7 +299,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
  */
 void _Error_Handler(char *file, int line) {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
+  /* User can add his own implementation to report the HAL error return state
+   */
   while (1) {
   }
   /* USER CODE END Error_Handler_Debug */
@@ -307,4 +322,5 @@ void _Error_Handler(char *file, int line) {
   }
 }
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF
+ * FILE****/

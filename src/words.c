@@ -11,12 +11,11 @@
 #include "forth/parse.h"
 #include "forth/stack.h"
 #include "forth/tib.h"
+#include "hal/bsp.h"
 
 #define FORTH_DEFINE_IMPLEMENTATIONS
 #include "forth/macros.h"
 #include "forth/macros_words_implementations.h"
 #undef FORTH_DEFINE_IMPLEMENTATIONS
 
-void WordsInit() {
-  GetDictionaryPointer()->head = &pause_node;
-}
+void WordsInit() { GetDictionaryPointer()->head = &pause_node; }
