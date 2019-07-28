@@ -51,7 +51,7 @@ void ForthWarning(const char *err_message, const char *word) {
 
 void ForthPrint(char *s) { SendMsg(s); }
 
-ForthObject StrToForthObj(const char *s) {
+ForthObject StrToForthObj(char *s) {
   static char *end = NULL;
   static ForthData r;
   static uint8_t i;
@@ -67,10 +67,13 @@ ForthObject StrToForthObj(const char *s) {
   if (i > 2) {
     if (toupper(s[i - 2]) == 'S' && s[i - 1] == '0') {
       t = kSingleFloat;
+      s[i - 2] = '\0';
     } else if (toupper(s[i - 2]) == 'D' && s[i - 1] == '0') {
       t = kDoubleFloat;
+      s[i - 2] = '\0';
     } else if (toupper(s[i - 2]) == 'L' && s[i - 1] == '0') {
       t = kLongDoubleFloat;
+      s[i - 2] = '\0';
     }
   }
   switch (t) {

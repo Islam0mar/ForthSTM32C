@@ -184,26 +184,31 @@ DEFCODE(_print, "+", 0, plus, " a b -- a+b ", {
   switch (FORTH_TYPE_MASK(GetTOSPtr()->type)) {
     case kFixNum: {
       PopPSP(&obj);
-      GetTOSPtr()->data += (intptr_t)obj.data;
+      FORTH_ASSERT(obj.type == kFixNum, "Adding different types");
+      GetTOSPtr()->data += (int32_t)obj.data;
       break;
     }
     case kBigNum: {
       PopPSP(&obj);
+      FORTH_ASSERT(obj.type == kBigNum, "Adding different types");
       *(int64_t *)GetTOSPtr()->data += *(int64_t *)obj.data;
       break;
     }
     case kSingleFloat: {
       PopPSP(&obj);
+      FORTH_ASSERT(obj.type == kSingleFloat, "Adding different types");
       *(float *)GetTOSPtr()->data += *(float *)obj.data;
       break;
     }
     case kDoubleFloat: {
       PopPSP(&obj);
+      FORTH_ASSERT(obj.type == kDoubleFloat, "Adding different types");
       *(double *)GetTOSPtr()->data += *(double *)obj.data;
       break;
     }
     case kLongDoubleFloat: {
       PopPSP(&obj);
+      FORTH_ASSERT(obj.type == kLongDoubleFloat, "Adding different types");
       *(long double *)GetTOSPtr()->data += *(long double *)obj.data;
       break;
     }

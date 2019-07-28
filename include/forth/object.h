@@ -11,7 +11,7 @@
 
 #include "global.h"
 
-#define FORTH_IS_FIXNUM_VAL(x) (x <= INTPTR_MAX && x >= INTPTR_MIN)
+#define FORTH_IS_FIXNUM_VAL(x) (x <= INT32_MAX && x >= INT32_MIN)
 #define FORTH_IS_BIGNUM_VAL(x) (x <= INT64_MAX && x >= INT64_MIN)
 #define FORTH_TYPE_MASK(t) ((ForthFixNum)(t)&kTypeMask)
 #define FORTH_FLAG_MASK(t) ((ForthFixNum)(t) & ~kTypeMask)
@@ -48,6 +48,12 @@ void ForthPrintObject(ForthObject obj);
 #define FORTH_DFLOAT(x) (*(double *)x)
 #define FORTH_LDFLOAT(x) (*(long double *)x)
 #define FORTH_CFUN(x) (*(ForthFuncPtr *)x)
+
+static inline ForthObject ForthAssert(ForthObject x) {
+  if (x.data == 0) return x;
+  x = FORTH_CONS_CAR(x.data);
+  return x;
+}
 
 static inline ForthObject ForthCar(ForthObject x) {
   if (x.data == 0) return x;

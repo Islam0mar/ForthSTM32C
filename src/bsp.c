@@ -33,6 +33,7 @@ void BspInit() {
    */
   HAL_Init();
   SystemClock_Config();
+  GPIO_Init();
 
   /* To not be optimized */
   HAL_UART_Receive_IT(&huart1, &terminal_buffer[terminal_buffer_insert_index],
@@ -209,7 +210,7 @@ void SystemClock_Config(void) {
  * EVENT_OUT
  * EXTI
  */
-void HAL_MspInit() {
+void GPIO_Init() {
   /* GPIO_InitTypeDef GPIO_InitStruct; */
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
