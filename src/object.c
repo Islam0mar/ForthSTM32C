@@ -6,8 +6,11 @@
  *
  */
 
+#include <stdio.h>
+
 #include "forth/object.h"
 #include "forth/parse.h"
+#include "forth/tib.h"
 
 static inline void *ForthAlloc(ForthIndex s) {
   static void *temp;
@@ -225,5 +228,66 @@ void ForthRemoveObject(ForthObject obj) {
 void ForthRemoveFreeObject(ForthObject obj) {
   if (BITMASK_CHECK_SET(obj.type, kFree)) {
     ForthRemoveObject(obj);
+  }
+}
+
+void ForthPrintObject(ForthObject obj) {
+  switch (FORTH_TYPE_MASK(obj.type)) {
+    case kCons: {
+      ForthPrint("( ");
+      ForthPrintObject(FORTH_CONS_CAR(obj.data));
+      ForthPrintObject(FORTH_CONS_CDR(obj.data));
+      ForthPrint(")");
+      break;
+    }
+    case kFixNum: {
+      snprintf((char *)pad, PAD_SIZE, "%ld", (ForthFixNum)obj.data);
+      ForthPrint((char *)pad);
+      ForthPrint(" ");
+      break;
+    }
+    case kBigNum: {
+      snprintf((char *)pad, PAD_SIZE, "%lld", *(ForthBigNum *)obj.data);
+      ForthPrint((char *)pad);
+      ForthPrint(" ");
+      break;
+    }
+    case kSingleFloat: {
+      snprintf((char *)pad, PAD_SIZE, "%f", *(float *)obj.data);
+      ForthPrint((char *)pad);
+      ForthPrint(" ");
+      break;
+    }
+    case kDoubleFloat: {
+      snprintf((char *)pad, PAD_SIZE, "%f", *(double *)obj.data);
+      ForthPrint((char *)pad);
+      ForthPrint(" ");
+      break;
+    }
+    case kLongDoubleFloat: {
+      snprintf((char *)pad, PAD_SIZE, "%Lf", *(long double *)obj.data);
+      ForthPrint((char *)pad);
+      ForthPrint(" ");
+      break;
+    }
+    case kVector: {
+      ForthIndex i;
+      ForthIndex n = ((ForthVector *)obj.data)->size;
+      ForthPrint("[ ");
+      for (i = 0; i < n; ++i) {
+        ForthPrintObject(((ForthVector *)obj.data)->word[i]);
+      }
+      ForthPrint("]");
+      break;
+    }
+    case kPointer: {
+      snprintf((char *)pad, PAD_SIZE, "%p", (void *)obj.data);
+      ForthPrint((char *)pad);
+      ForthPrint(" ");
+      break;
+    }
+    default:
+      ForthError("UNKNOWN TYPE", "ForthPrintObject");
+      break;
   }
 }

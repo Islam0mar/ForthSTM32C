@@ -40,7 +40,7 @@ extern const uint32_t flash_end;
 #define FORTH_CMP_STATE() BITMASK_SET(state, F_CMP)                  //  exe
 #define FORTH_EXE_STATE() BITMASK_CLEAR(state, F_CMP)                //  exe
 
-typedef intptr_t ForthData;
+typedef int32_t ForthData;
 typedef int32_t ForthFixNum;
 typedef int64_t ForthBigNum;
 typedef char ForthCharacter;

@@ -210,7 +210,7 @@ void SystemClock_Config(void) {
  * EXTI
  */
 void HAL_MspInit() {
-  GPIO_InitTypeDef GPIO_InitStruct;
+  /* GPIO_InitTypeDef GPIO_InitStruct; */
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();

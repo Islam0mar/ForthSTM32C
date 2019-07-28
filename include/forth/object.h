@@ -36,6 +36,7 @@ void ForthAddToVector(ForthObject x, ForthVector *v);
 ForthObject ForthCreateObject(ForthData x, ForthType t);
 void ForthRemoveObject(ForthObject obj);
 void ForthRemoveFreeObject(ForthObject obj);
+void ForthPrintObject(ForthObject obj);
 
 #define FORTH_CONS_CAR(x) (((ForthCons *)x)->car)
 #define FORTH_CONS_CDR(x) (((ForthCons *)x)->cdr)

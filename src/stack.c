@@ -128,52 +128,15 @@ void TraverseStack(Stack *ps, void (*pvisit)(StackEntry)) {
 
 /* helper fun for print */
 void PrintObject(StackEntry item) {
-  /* char * data; */
-  /* switch (FORTH_TYPE_MASK(item.type)) { */
-  /*   case kCons: { */
-  /*     data = strtol(); */
-  /*     break; */
-  /*   } */
-  /*   case kFixNum: { */
-  /*     data = -1; */
-  /*     break; */
-  /*   } */
-  /*   case kBigNum: { */
-  /*     data = ForthAlloc(sizeof(ForthBigNum)); */
-  /*     break; */
-  /*   } */
-  /*   case kSingleFloat: { */
-  /*     data = ForthAlloc(sizeof(float)); */
-  /*     break; */
-  /*   } */
-  /*   case kDoubleFloat: { */
-  /*     data = ForthAlloc(sizeof(double)); */
-  /*     break; */
-  /*   } */
-  /*   case kLongDoubleFloat: { */
-  /*     data = ForthAlloc(sizeof(long double)); */
-  /*     break; */
-  /*   } */
-  /*   case kVector: { */
-  /*     data = ForthAlloc(sizeof(ForthVector)); */
-  /*     break; */
-  /*   } */
-  /*   case kPointer: { */
-  /*     data = NULL; */
-  /*     break; */
-  /*   } */
-  /*   default: */
-  /*     ForthError("UNKNOWN TYPE", "ForthCreateData"); */
-  /*     break; */
-  /* } */
-  ForthPrint(itoa(item.data, base));
+  ForthPrintObject(item);
+  /* ForthPrint(itoa(item.data, base)); */
   ForthPrint(" ");
 }
 /* print stack */
 void PrintStack() {
   ForthPrint("S< ");
   TraverseStack(STACK_PTR, PrintObject);
-  ForthPrint(itoa(GetTOSPtr()->data, base));
+  ForthPrintObject(*GetTOSPtr());
   ForthPrint(" ");
   ForthPrint(">\n");
 }

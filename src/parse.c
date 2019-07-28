@@ -15,18 +15,17 @@
 #include "forth/words.h"
 #include "hal/bsp.h"
 
-char *itoa(int val, int base) {
-  static char buf[32] = {0};
-  int i = 31;
+/* char *itoa(int val, int base) { */
+/*   int i = 31; */
 
-  do {
-    buf[i] = "0123456789abcdef"[val % base];
-    --i;
-    val /= base;
-  } while (val && i);
+/*   do { */
+/*     pad[i] = "0123456789abcdef"[val % base]; */
+/*     --i; */
+/*     val /= base; */
+/*   } while (val && i); */
 
-  return &buf[i + 1];
-}
+/*   return &pad[i + 1]; */
+/* } */
 
 void ForthError(const char *err_message, const char *word) {
   SendMsg("Error: ");
@@ -64,6 +63,7 @@ ForthObject StrToForthObj(const char *s) {
   t = kPointer;
   for (i = 0; s[i] != '\0'; i++) {
   }
+  /* FIXME:  */
   if (i > 2) {
     if (toupper(s[i - 2]) == 'S' && s[i - 1] == '0') {
       t = kSingleFloat;

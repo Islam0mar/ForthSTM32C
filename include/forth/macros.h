@@ -120,7 +120,7 @@
 #define DEFCODE(previous_word, name_str, flags, func, _comnt, BLOCK)           \
   void func() BLOCK;                                                           \
   const DictionaryNode func##_node = {                                         \
-      .next = ADDRS(previous_word##_node),                                     \
+      .next = (DictionaryNode *)ADDRS(previous_word##_node),                   \
       .entry = {.object = {.data = (ForthData)&func,                           \
                            .type = (flags | kPointer | kFlash | kExecutable)}, \
                 .name = name_str}}
@@ -129,7 +129,7 @@
   const ForthObject obj[COUNT_VARARGS(words)] = {FUN_TO_FORTH_OBJECT(words)}; \
   const ForthVector v = {.size = COUNT_VARARGS(words), .word = obj};          \
   const DictionaryNode func##_node = {                                        \
-      .next = ADDRS(previous_word##_node),                                    \
+      .next = (DictionaryNode *)ADDRS(previous_word##_node),                  \
       entry = {.object = {.data = (ForthData)&v,                              \
                           .type = (flags | kVector | kFlash | kExecutable)},  \
                .name = name_str}}

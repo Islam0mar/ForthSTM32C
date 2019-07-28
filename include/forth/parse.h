@@ -6,16 +6,15 @@
  *
  */
 
-
 #ifndef PARSE_H
 #define PARSE_H
 
 #include "global.h"
 
 ForthObject StrToForthObj(const char* s);
-char* itoa(int val, int base);
+/* char* itoa(int val, int base); */
 void ForthError(const char* err_message, const char* word);
 void ForthWarning(const char* err_message, const char* word);
-void ForthPrint(char *s);
+void ForthPrint(char* s);
 
 #endif /* PARSE_H */

@@ -13,7 +13,7 @@
 uint8_t terminal_buffer[TIB_SIZE];
 uint8_t terminal_buffer_get_index;
 uint8_t terminal_buffer_insert_index;
-uint8_t pad[PAD_SIZE];
+uint8_t pad[PAD_SIZE] = {0};
 
 uint8_t TIBGetIndex() {
   while (terminal_buffer_get_index == terminal_buffer_insert_index) {

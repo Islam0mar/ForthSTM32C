@@ -60,7 +60,7 @@ set(CMAKE_COMPILE_COMMANDS_DIR "${PROJECT_PATH}/bin")
 # linker
 set(LINKER_SCRIPT ${PROJECT_SOURCE_DIR}/STM32F103C8T6.ld)
 #set(CMAKE_EXE_LINKER_FLAGS "-v -T ${LINKER_SCRIPT}")
-set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} -Wl,--gc-sections -mthumb -mcpu=cortex-m3 --specs=nosys.specs")
+set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} -Wl,--gc-sections -Wl,-Map=my_program.map -mthumb -mcpu=cortex-m3 --specs=nosys.specs")
 
 set(CMAKE_C_FLAGS "-ggdb3 -O0 -mthumb -save-temps -mcpu=cortex-m3 -fno-builtin -DUSE_HAL_DRIVER -DSTM32F103xB -Wall -std=c99 -ffreestanding -fdata-sections -ffunction-sections")
 set(CMAKE_CXX_FLAGS " -mthumb -mcpu=cortex-m3 -fno-builtin -Wall std=c++11 -ffreestanding  -fdata-sections -ffunction-sections")

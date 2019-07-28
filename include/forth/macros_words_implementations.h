@@ -177,7 +177,7 @@ DEFCODE(_char, ".S", 0, print_stack,
         " ( -- c ) put the ASCII code of the first character of the next word",
         { PrintStack(); });
 DEFCODE(print_stack, ".", 0, _print, " print word",
-        { ForthPrint(itoa(GetTOSPtr()->data, base)); });
+        { ForthPrintObject(*GetTOSPtr()); });
 
 DEFCODE(_print, "+", 0, plus, " a b -- a+b ", {
   static ForthObject obj;

@@ -18,4 +18,6 @@
 #include "forth/macros_words_implementations.h"
 #undef FORTH_DEFINE_IMPLEMENTATIONS
 
-void WordsInit() { GetDictionaryPointer()->head = &pause_node; }
+void WordsInit() {
+  GetDictionaryPointer()->head = (DictionaryNode *)&pause_node;
+}
